@@ -1,0 +1,57 @@
+{
+  "name": "action-check-vim-version",
+  "description": "A GitHub Action for setting up Vim",
+  "version": "0.0.0",
+  "author": "thinca <thinca+npm@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/thinca/setup-vim-action/issues"
+  },
+  "dependencies": {
+    "@actions/core": "^1.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.29",
+    "@typescript-eslint/eslint-plugin": "^2.22.0",
+    "@typescript-eslint/parser": "^2.22.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-import": "^2.20.1",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.0",
+    "webpack-cli": "^3.3.11"
+  },
+  "homepage": "https://github.com/thinca/setup-vim-action",
+  "keywords": [
+    "ci",
+    "github",
+    "github-actions",
+    "vim"
+  ],
+  "license": "Zlib",
+  "main": "index.js",
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "all": true,
+    "require": [
+      "ts-node/register"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "test/**/*.ts"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thinca/setup-vim-action.git"
+  },
+  "scripts": {
+    "build": "webpack-cli",
+    "lint": "eslint '**/*.ts'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

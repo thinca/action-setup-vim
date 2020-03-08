@@ -1,0 +1,50 @@
+name: 'Release'
+on:
+  push:
+    tags:
+      - 'v*.*.*\+src'
+
+jobs:
+  release:
+    name: 'Release'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/checkout@v2'
+      - name: 'Release a new version'
+        run: |
+          set -x
+
+          ORIGINAL_TAG=${GITHUB_REF##*/}
+          PATCH_VER=${ORIGINAL_TAG%+src}
+          MINOR_VER=${PATCH_VER%.*}
+          MAJOR_VER=${MINOR_VER%.*}
+
+          git fetch --no-tags --force origin tag ${ORIGINAL_TAG}
+
+          SUBJECT="$(git tag --list "${ORIGINAL_TAG}" --format="%(contents:subject)" | ruby -e 'print ARGF.read.sub(/\n+\z/,"")' | jq --raw-input --slurp .)"
+          BODY="$(git tag --list "${ORIGINAL_TAG}" --format="%(contents:body)" | ruby -e 'print ARGF.read.sub(/\n+\z/,"")' | jq --raw-input --slurp .)"
+
+          npm ci
+          npm run --silent build -- --mode=production
+          git switch --orphan release
+          git checkout "${GITHUB_SHA}" -- action.yml README.md
+          git add action.js
+          git config user.email "$(git log -1 --format=format:%ce ${GITHUB_SHA})"
+          git config user.name "$(git log -1 --format=format:%cn ${GITHUB_SHA})"
+          git commit -C "${GITHUB_SHA}"
+          git tag "${PATCH_VER}"
+          git tag "${MINOR_VER}"
+          git tag "${MAJOR_VER}"
+          git push origin --force "${MAJOR_VER}" "${MINOR_VER}" "${PATCH_VER}"
+
+          wget --method=POST \
+          --quiet --content-on-error \
+          --output-document=- \
+          --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+          --header 'Content-Type: application/json' \
+          --body-data '{
+            "tag_name": "'"${PATCH_VER}"'",
+            "name": '"${SUBJECT}"',
+            "body": '"${BODY}"'
+          }' \
+          'https://api.github.com/repos/${{ github.repository }}/releases'

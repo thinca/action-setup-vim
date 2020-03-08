@@ -1,0 +1,140 @@
+name: 'Test'
+on: ['push', 'pull_request']
+
+jobs:
+  setup-actions:
+    name: 'Setup actions'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/checkout@v2'
+      - name: 'Cache actions'
+        id: 'action-js'
+        uses: 'actions/cache@v1'
+        with:
+          path: './actions'
+          key: '${{ github.sha }}'
+      - name: 'Cache node packages'
+        uses: 'actions/cache@v1'
+        if: "steps.action-js.outputs.cache-hit != 'true'"
+        with:
+          path: '~/.npm'
+          key: "${{ hashFiles('package-lock.json') }}-${{ hashFiles('.github/actions/check-version/package-lock.json') }}"
+      - name: 'Build actions'
+        if: "steps.action-js.outputs.cache-hit != 'true'"
+        run: |
+          npm ci
+          npm run --silent build
+          mkdir -p ${GITHUB_WORKSPACE}/actions/setup-vim
+          cp action.js action.yml ${GITHUB_WORKSPACE}/actions/setup-vim
+
+          cd ${GITHUB_WORKSPACE}/.github/actions/check-version
+          npm ci
+          npm run --silent build
+          mkdir -p ${GITHUB_WORKSPACE}/actions/check-version
+          cp action.js action.yml ${GITHUB_WORKSPACE}/actions/check-version
+
+  test:
+    name: '${{ matrix.gui_cui }}/${{ matrix.dl_bd }}: ${{ matrix.vim_type }} ${{ matrix.vim_version }} on ${{ matrix.platform }}'
+    strategy:
+      matrix:
+        vim_type: ['Vim', 'Neovim', 'MacVim']
+        vim_version: ['head', 'latest', 'stable']
+        platform: ['Linux', 'MacOS', 'Windows']
+        gui_cui: ['GUI', 'CUI']
+        dl_bd: ['DL', 'BD']
+
+        include:
+          - platform: 'Linux'
+            os: 'ubuntu-latest'
+          - platform: 'MacOS'
+            os: 'macos-latest'
+          - platform: 'Windows'
+            os: 'windows-latest'
+          - gui_cui: 'GUI'
+            gui: 'yes'
+          - gui_cui: 'CUI'
+            gui: 'no'
+          - dl_bd: 'DL'
+            download: 'always'
+          - dl_bd: 'AT'
+            download: 'available'
+          - dl_bd: 'BD'
+            download: 'never'
+          - vim_type: 'Vim'
+            vim_version: 'latest'
+            version: 'v8.2.0000'
+          # 'latest' is only available on DL
+          - vim_type: 'Neovim'
+            vim_version: 'latest'
+            dl_bd: 'BD'
+            version: 'v0.4.3'
+          - vim_type: 'Vim'
+            vim_version: 'stable'
+            version: 'v8.1.0001'
+          - vim_type: 'MacVim'
+            vim_version: 'latest'
+            version: 'snapshot-162'  # v8.2.0319
+          - vim_type: 'MacVim'
+            vim_version: 'stable'
+            version: 'snapshot-159'  # v8.1.2168
+
+        exclude:
+          # AppImage does not support in old Vim
+          - vim_type: 'Vim'
+            platform: 'Linux'
+            dl_bd: 'DL'
+            vim_version: 'stable'
+          # DL Vim in MacOS is unavailable
+          - vim_type: 'Vim'
+            platform: 'MacOS'
+            dl_bd: 'DL'
+          # Building Neovim v0.4.3 and before versions will be failure.
+          - vim_type: 'Neovim'
+            dl_bd: 'BD'
+            vim_version: 'latest'
+          - vim_type: 'Neovim'
+            dl_bd: 'BD'
+            vim_version: 'stable'
+          # GUI version of Neovim is unavailable (also skip on Windows)
+          - vim_type: 'Neovim'
+            gui_cui: 'GUI'
+          # Build Neovim on Windows is not supported yet
+          - vim_type: 'Neovim'
+            platform: 'Windows'
+            dl_bd: 'BD'
+          # GUI version of MacVim is unavailable
+          - platform: 'MacOS'
+            gui_cui: 'GUI'
+          # MacVim is available only on MacOS
+          - vim_type: 'MacVim'
+            platform: 'Linux'
+          - vim_type: 'MacVim'
+            platform: 'Windows'
+      fail-fast: false
+
+    needs: 'setup-actions'
+    runs-on: '${{ matrix.os }}'
+    timeout-minutes: 5
+
+    steps:
+      - name: 'Restore actions'
+        id: 'action-js'
+        uses: 'actions/cache@v1'
+        with:
+          path: './actions'
+          key: '${{ github.sha }}'
+      - name: 'Setup Vim'
+        id: 'vim'
+        uses: './actions/setup-vim'
+        with:
+          vim_version: '${{ matrix.version || matrix.vim_version }}'
+          vim_type: '${{ matrix.vim_type }}'
+          gui: '${{ matrix.gui }}'
+          download: '${{ matrix.download }}'
+      - name: 'Check Vim version'
+        uses: './actions/check-version'
+        with:
+          expected_vim_version: '${{ steps.vim.outputs.actual_vim_version }}'
+          executable: '${{ steps.vim.outputs.executable }}'
+          vim_type: '${{ matrix.vim_type }}'
+          gui: '${{ matrix.gui }}'

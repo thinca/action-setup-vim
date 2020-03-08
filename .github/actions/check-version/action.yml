@@ -1,0 +1,31 @@
+name: 'Check Vim version'
+description: 'Checking the version of installed Vim'
+author: 'thinca <thinca@gmail.com>'
+
+inputs:
+  expected_vim_version:
+    description: |-
+      Version of Vim.
+    required: true
+  vim_type:
+    description: |-
+      Type of Vim.
+      This is one of `vim`, `neovim`, or `macvim`.
+    required: true
+  gui:
+    description: |-
+      When this is `yes`, setups the GUI version.
+      And `outputs.executable` points to GUI version of Vim.
+    required: true
+  executable:
+    description: |-
+    required: true
+
+branding:
+  icon: 'check'
+  color: 'green'
+
+runs:
+  using: 'node12'
+  main: 'action.js'
+
