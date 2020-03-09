@@ -5,7 +5,7 @@ export type FixedVersion = FixedVersionBrand & string;
 export interface Installer {
   readonly installType: InstallType;
   readonly installDir: string;
-  isGUI: boolean;
+  readonly isGUI: boolean;
   getExecutableName(): string;
   resolveVersion(vimVersion: string): Promise<FixedVersion>;
   install(vimVersion: FixedVersion): Promise<void>;
