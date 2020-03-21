@@ -28,14 +28,19 @@ function timeout<T>(promise: Promise<T>, timeoutMilliseconds: number): Promise<T
 // v8.2.0012 -> 8.2.12
 // v0.5.0 -> 0.5
 // v0.5.0-404-g49cd750d6 -> 49cd750d6
+// v0.5.0-nightly -> nightly
 // 49cd750d6a72efc0571a89d7a874bbb01081227f -> 49cd750d6a72efc0571a89d7a874bbb01081227f
 function normalizeVersion(str: string): string {
   if (str.indexOf(".") < 0) {
     return str;
   }
+  const matched = /^.*-\d+-g([0-9a-f]{7,})$/.exec(str);
+  if (matched) {
+    return matched[1];
+  }
   if (0 <= str.indexOf("-")) {
     const parts = str.split("-");
-    return parts[parts.length - 1].replace(/^g/, "");
+    return parts[parts.length - 1];
   }
   return str.
     replace(/.*?(\d+(?:\.\d+)*).*/s, "$1").
@@ -113,7 +118,7 @@ async function getVersionOutput(vimType: string, isGUI: boolean, executable: str
   }
 }
 
-async function main(): Promise<void> {
+async function check(): Promise<string> {
   const vimType = core.getInput("vim_type").toLowerCase();
   const isGUI = core.getInput("gui") === "yes";
   const executable = core.getInput("executable");
@@ -130,14 +135,29 @@ async function main(): Promise<void> {
   core.info(versionOutput);
   core.info("-------");
 
-  const expectedVersion = normalizeVersion(expectedVimVersion);
+  const normalizedExpectedVersion = normalizeVersion(expectedVimVersion);
 
-  const isSha1 = /^[0-9a-f]{7,}$/.test(expectedVersion);
-  if (isSha1 ? expectedVersion.startsWith(actualVersion) : expectedVersion === actualVersion) {
-    core.info("Correct version installed");
-  } else {
-    throw Error(`Installed Vim's version is wrong:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`);
+  if (actualVersion === "nightly") {
+    return `Can not check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
   }
+  const isSha1 = /^[0-9a-f]{7,}$/.test(normalizedExpectedVersion);
+  if (isSha1) {
+    if (vimType === "neovim") {
+      if (normalizedExpectedVersion.startsWith(actualVersion)) {
+        return "Correct version installed";
+      }
+    } else {
+      return `Can not check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
+    }
+  } else if (normalizedExpectedVersion === actualVersion) {
+    return "Correct version installed";
+  }
+
+  throw Error(`Installed Vim's version is wrong:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`);
+}
+
+async function main(): Promise<void> {
+  core.info(await check());
 }
 
 
