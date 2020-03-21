@@ -41,7 +41,7 @@ jobs:
         vim_version: ['head', 'latest', 'stable']
         platform: ['Linux', 'MacOS', 'Windows']
         gui_cui: ['GUI', 'CUI']
-        dl_bd: ['DL', 'BD']
+        dl_bd: ['DL', 'AT', 'BD']
 
         include:
           - platform: 'Linux'
@@ -56,6 +56,8 @@ jobs:
             gui: 'no'
           - dl_bd: 'DL'
             download: 'always'
+          - dl_bd: 'AT'
+            download: 'available'
           - dl_bd: 'BD'
             download: 'never'
           - vim_type: 'Vim'
