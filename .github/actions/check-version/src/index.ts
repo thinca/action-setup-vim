@@ -28,14 +28,19 @@ function timeout<T>(promise: Promise<T>, timeoutMilliseconds: number): Promise<T
 // v8.2.0012 -> 8.2.12
 // v0.5.0 -> 0.5
 // v0.5.0-404-g49cd750d6 -> 49cd750d6
+// v0.5.0-nightly -> nightly
 // 49cd750d6a72efc0571a89d7a874bbb01081227f -> 49cd750d6a72efc0571a89d7a874bbb01081227f
 function normalizeVersion(str: string): string {
   if (str.indexOf(".") < 0) {
     return str;
   }
+  const matched = /^.*-\d+-g([0-9a-f]{7,})$/.exec(str);
+  if (matched) {
+    return matched[1];
+  }
   if (0 <= str.indexOf("-")) {
     const parts = str.split("-");
-    return parts[parts.length - 1].replace(/^g/, "");
+    return parts[parts.length - 1];
   }
   return str.
     replace(/.*?(\d+(?:\.\d+)*).*/s, "$1").
@@ -130,18 +135,21 @@ async function check(): Promise<string> {
   core.info(versionOutput);
   core.info("-------");
 
-  const expectedVersion = normalizeVersion(expectedVimVersion);
+  const normalizedExpectedVersion = normalizeVersion(expectedVimVersion);
 
-  const isSha1 = /^[0-9a-f]{7,}$/.test(expectedVersion);
+  if (actualVersion === "nightly") {
+    return `Can not check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
+  }
+  const isSha1 = /^[0-9a-f]{7,}$/.test(normalizedExpectedVersion);
   if (isSha1) {
     if (vimType === "neovim") {
-      if (expectedVersion.startsWith(actualVersion)) {
+      if (normalizedExpectedVersion.startsWith(actualVersion)) {
         return "Correct version installed";
       }
     } else {
-      return `Can not check the version: expected = "${expectedVimVersion}"`;
+      return `Can not check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
     }
-  } else if (expectedVersion === actualVersion) {
+  } else if (normalizedExpectedVersion === actualVersion) {
     return "Correct version installed";
   }
 
