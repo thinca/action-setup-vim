@@ -24,6 +24,11 @@ export abstract class BuildInstaller implements Installer {
     this.isGUI = isGUI;
   }
 
+  // Currently, BuildInstaller.canInstall() is not used.
+  canInstall(): boolean {
+    return true;
+  }
+
   repositoryPath(): string {
     if (!this._repositoryPath) {
       const repoName = this.repository.split("/").pop() || "vim";

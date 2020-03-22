@@ -13,7 +13,7 @@ function adjustSemver(ver: string): string {
   return ver.replace(/\.0*(\d)/g, ".$1");
 }
 
-function toSemver(ver: string): semver.SemVer | null {
+export function toSemver(ver: string): semver.SemVer | null {
   if (/^v?\d/.test(ver)) {
     return semver.coerce(adjustSemver(ver));
   }
@@ -38,6 +38,10 @@ export abstract class ReleasesInstaller implements Installer {
   constructor(installDir: string, isGUI: boolean) {
     this.installDir = installDir;
     this.isGUI = isGUI;
+  }
+
+  canInstall(_version: string): boolean {
+    return true;
   }
 
   async resolveVersion(vimVersion: string): Promise<FixedVersion> {

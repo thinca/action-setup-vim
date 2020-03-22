@@ -18,9 +18,9 @@ async function main(): Promise<void> {
 
   const download = core.getInput("download");
   const isGUI = core.getInput("gui") === "yes";
-  const installer = getInstaller(installPath, vimType, isGUI, download);
-
   const inputVimVersion = core.getInput("vim_version");
+  const installer = getInstaller(installPath, vimType, isGUI, download, inputVimVersion);
+
   const fixedVersion = await installer.resolveVersion(inputVimVersion);
   core.info(`Vim version: ${fixedVersion}`);
 

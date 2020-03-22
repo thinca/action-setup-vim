@@ -7,6 +7,7 @@ export interface Installer {
   readonly installDir: string;
   readonly isGUI: boolean;
   getExecutableName(): string;
+  canInstall(vimVersion: string): boolean;
   resolveVersion(vimVersion: string): Promise<FixedVersion>;
   install(vimVersion: FixedVersion): Promise<void>;
   getPath(vimVersion: FixedVersion): string;
