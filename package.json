@@ -37,7 +37,7 @@
     "vim"
   ],
   "license": "Zlib",
-  "main": "index.js",
+  "main": "action.js",
   "nyc": {
     "extension": [
       ".ts"
