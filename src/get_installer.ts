@@ -79,13 +79,17 @@ function _getInstaller(installDir: string, vimType: VimType, isGUI: boolean, isD
   throw new ActionError(`Unsupported platform: ${process.platform}`);
 }
 
-export function getInstaller(installDir: string, vimType: VimType, isGUI: boolean, download: string): Installer {
+export function getInstaller(installDir: string, vimType: VimType, isGUI: boolean, download: string, version: string): Installer {
   switch (download) {
     case "always":
       return _getInstaller(installDir, vimType, isGUI, true);
     case "available":
       try {
-        return _getInstaller(installDir, vimType, isGUI, true);
+        const installer = _getInstaller(installDir, vimType, isGUI, true);
+        if (!installer.canInstall(version)) {
+          throw new InstallerUnavailableError();
+        }
+        return installer;
       } catch (e) {
         if (e instanceof InstallerUnavailableError) {
           return _getInstaller(installDir, vimType, isGUI, false);

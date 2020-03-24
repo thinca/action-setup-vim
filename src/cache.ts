@@ -7,7 +7,7 @@ import * as tar from "cache/src/tar";
 import {VimType} from "./interfaces";
 import {TEMP_PATH} from "./temp";
 
-const actionVersion = "0.0.0";
+const actionVersion = "1.0.1";
 
 function makeKey(vimType: VimType, vimVersion: string): string {
   return `${actionVersion}-${process.platform}-${vimType}-${vimVersion}`;

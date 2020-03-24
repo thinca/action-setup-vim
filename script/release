@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Release script
+#
+# Usage: ./script/release 1.0.0
+# Run on develop branch.
+#
+# This script executes:
+# 1. Version bump in CHANGELOG.md, package{,-lock}.json, cache.ts and commit
+# 2. Merge "develop" into "master"
+# 3. Create a new tag with annotation containing release note
+
+set -eu
+
+update-package-version() {
+	local file
+	local version
+	file=${1}
+	version=${2}
+	if [[ -f "${file}" ]]; then
+		sed -i -e "s/^  \"version\": \"[^\"]\\+\"/  \"version\": \"${version}\"/" "${file}"
+		git add "${file}"
+	fi
+}
+
+version=$1
+
+if [[ -z ${version} ]]; then
+	echo "Usage: $0 {version}" >&2
+	exit 64
+fi
+
+current_branch=$(git branch --show-current)
+
+if [[ ${current_branch} != 'develop' ]]; then
+	echo 'You must release on "develop" branch.' >&2
+	exit 10
+fi
+
+if [[ ! -f CHANGELOG.md ]]; then
+	echo 'CHANGELOG.md not found.' >&2
+	exit 10
+fi
+
+release_note=$(sed -e '1,/## Unreleased/d' -e '/^##/,$d' CHANGELOG.md | sed -z -e 's/^\s\+//')
+if [[ -z "${release_note}" ]]; then
+	echo 'Release note not found.' >&2
+	exit 10
+fi
+
+new_version_header="v${version} - $(date '+%Y-%m-%d')"
+tag_message="${new_version_header}
+
+${release_note}"
+
+sed -i -e "s/^## Unreleased$/## ${new_version_header}/" CHANGELOG.md
+git add CHANGELOG.md
+sed -i -e "s/^const actionVersion = \".\\+\";$/const actionVersion = \"${version}\";/" src/cache.ts
+git add src/cache.ts
+update-package-version package.json "${version}"
+update-package-version package-lock.json "${version}"
+
+git commit -m "v${version}"
+git checkout master
+git merge --no-edit --no-ff develop
+echo "${tag_message}" | git tag -s -F - "v${version}+src"
+git checkout develop

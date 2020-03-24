@@ -41,7 +41,7 @@ jobs:
         vim_version: ['head', 'latest', 'stable']
         platform: ['Linux', 'MacOS', 'Windows']
         gui_cui: ['GUI', 'CUI']
-        dl_bd: ['DL', 'BD']
+        dl_bd: ['DL', 'AT', 'BD']
 
         include:
           - platform: 'Linux'
@@ -63,11 +63,6 @@ jobs:
           - vim_type: 'Vim'
             vim_version: 'latest'
             version: 'v8.2.0000'
-          # 'latest' is only available on DL
-          - vim_type: 'Neovim'
-            vim_version: 'latest'
-            dl_bd: 'BD'
-            version: 'v0.4.3'
           - vim_type: 'Vim'
             vim_version: 'stable'
             version: 'v8.1.0001'
