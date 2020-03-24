@@ -21,8 +21,10 @@ jobs:
 
           git fetch --no-tags --force origin tag ${ORIGINAL_TAG}
 
-          SUBJECT="$(git tag --list "${ORIGINAL_TAG}" --format="%(contents:subject)" | ruby -e 'print ARGF.read.sub(/\n+\z/,"")' | jq --raw-input --slurp .)"
-          BODY="$(git tag --list "${ORIGINAL_TAG}" --format="%(contents:body)" | ruby -e 'print ARGF.read.sub(/\n+\z/,"")' | jq --raw-input --slurp .)"
+          SUBJECT="$(git tag --list "${ORIGINAL_TAG}" --format="%(contents:subject)")"
+          SUBJECT_JSON=$(echo -n "${SUBJECT}" | jq --raw-input --slurp .)
+          BODY="$(git tag --list "${ORIGINAL_TAG}" --format="%(contents:body)")"
+          BODY_JSON=$(echo -n "${BODY}" | jq --raw-input --slurp .)
 
           npm ci
           npm run --silent build -- --mode=production
@@ -44,7 +46,7 @@ jobs:
           --header 'Content-Type: application/json' \
           --body-data '{
             "tag_name": "'"${PATCH_VER}"'",
-            "name": '"${SUBJECT}"',
-            "body": '"${BODY}"'
+            "name": '"${SUBJECT_JSON}"',
+            "body": '"${BODY_JSON}"'
           }' \
           'https://api.github.com/repos/${{ github.repository }}/releases'
