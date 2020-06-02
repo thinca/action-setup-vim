@@ -6,7 +6,7 @@
 # Run on develop branch.
 #
 # This script executes:
-# 1. Version bump in CHANGELOG.md, package{,-lock}.json, cache.ts and commit
+# 1. Version bump in CHANGELOG.md, package{,-lock}.json, index.ts and commit
 # 2. Merge "develop" into "master"
 # 3. Create a new tag with annotation containing release note
 
@@ -55,8 +55,8 @@ ${release_note}"
 
 sed -i -e "s/^## Unreleased$/## ${new_version_header}/" CHANGELOG.md
 git add CHANGELOG.md
-sed -i -e "s/^const actionVersion = \".\\+\";$/const actionVersion = \"${version}\";/" src/cache.ts
-git add src/cache.ts
+sed -i -e "s/^const actionVersion = \".\\+\";$/const actionVersion = \"${version}\";/" src/index.ts
+git add src/index.ts
 update-package-version package.json "${version}"
 update-package-version package-lock.json "${version}"
 
