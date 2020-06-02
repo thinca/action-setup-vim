@@ -14,11 +14,11 @@
     "@actions/io": "^1.0.2",
     "@actions/tool-cache": "^1.5.5",
     "@octokit/rest": "^16.43.1",
-    "semver": "^6.3.0"
+    "semver": "^7.3.2"
   },
   "devDependencies": {
     "@types/node": "^12.12.43",
-    "@types/semver": "^6.2.1",
+    "@types/semver": "^7.2.0",
     "@typescript-eslint/eslint-plugin": "^3.1.0",
     "@typescript-eslint/parser": "^3.1.0",
     "eslint": "^7.1.0",
