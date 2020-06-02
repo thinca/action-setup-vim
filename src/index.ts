@@ -62,7 +62,13 @@ async function post(): Promise<void> {
     const vimType = core.getInput("vim_type").toLowerCase();
     const installPath = core.getState("install_path");
     if (isVimType(vimType)) {
-      await cache.save(vimType, version, installPath);
+      try {
+        await cache.save(vimType, version, installPath);
+      } catch (e) {
+        if (!(/Cache already exists/.test(e.message))) {
+          throw e;
+        }
+      }
     }
   }
 }
