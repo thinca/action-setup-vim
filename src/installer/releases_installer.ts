@@ -164,7 +164,6 @@ export abstract class ReleasesInstaller implements Installer {
       const {data: refRes} = await octokit.git.getRef({owner, repo, ref: `tags/${tagName}`});
       let sha = refRes.object.sha;
       if (refRes.object.type === "tag") {
-        // eslint-disable-next-line @typescript-eslint/camelcase
         const {data: tagRes} = await octokit.git.getTag({owner, repo, tag_sha: sha});
         sha = tagRes.object.sha;
       }
