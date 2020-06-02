@@ -35,10 +35,10 @@ async function main(): Promise<void> {
   if (!installed) {
     await io.mkdirP(installPath);
 
-    const useCache = !download && core.getInput("cache") === "true";
+    const useCache = installer.installType == "build" && core.getInput("cache") === "true";
 
     if (useCache) {
-      const cacheExists = await cache.restore(vimType, fixedVersion, installPath);
+      const cacheExists = await cache.restore(vimType, isGUI, fixedVersion, installPath);
       if (!cacheExists) {
         await installer.install(fixedVersion);
         core.saveState("version", fixedVersion);
@@ -60,9 +60,16 @@ async function post(): Promise<void> {
   const version = core.getState("version");
   if (version) {
     const vimType = core.getInput("vim_type").toLowerCase();
+    const isGUI = core.getInput("gui") === "yes";
     const installPath = core.getState("install_path");
     if (isVimType(vimType)) {
-      await cache.save(vimType, version, installPath);
+      try {
+        await cache.save(vimType, isGUI, version, installPath);
+      } catch (e) {
+        if (!(/Cache already exists/.test(e.message))) {
+          throw e;
+        }
+      }
     }
   }
 }
