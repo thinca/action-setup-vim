@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Fixed: Caching feature was always disabled.
+
 
 ## v1.0.1 - 2020-03-25
 
