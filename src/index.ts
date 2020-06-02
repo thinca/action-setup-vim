@@ -3,10 +3,17 @@ import * as path from "path";
 import * as core from "@actions/core";
 import * as io from "@actions/io";
 import {ActionError} from "./action_error";
-import {isVimType} from "./interfaces";
-import * as cache from "./cache";
+import {VimType, isVimType} from "./interfaces";
+import * as cache from "@actions/cache";
 import {getInstaller} from "./get_installer";
 import {TEMP_PATH} from "./temp";
+
+const actionVersion = "1.0.1";
+
+function makeCacheKey(vimType: VimType, isGUI: boolean, vimVersion: string): string {
+  return `${actionVersion}-${process.platform}-${vimType}-${isGUI ? "gui" : "cui"}-${vimVersion}`;
+}
+
 
 async function main(): Promise<void> {
   const installPath = path.join(TEMP_PATH, "vim");
@@ -38,7 +45,7 @@ async function main(): Promise<void> {
     const useCache = installer.installType == "build" && core.getInput("cache") === "true";
 
     if (useCache) {
-      const cacheExists = await cache.restore(vimType, isGUI, fixedVersion, installPath);
+      const cacheExists = await cache.restoreCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion), []);
       if (!cacheExists) {
         await installer.install(fixedVersion);
         core.saveState("version", fixedVersion);
@@ -64,7 +71,7 @@ async function post(): Promise<void> {
     const installPath = core.getState("install_path");
     if (isVimType(vimType)) {
       try {
-        await cache.save(vimType, isGUI, version, installPath);
+        await cache.saveCache([installPath], makeCacheKey(vimType, isGUI, version));
       } catch (e) {
         if (!(/Cache already exists/.test(e.message))) {
           throw e;

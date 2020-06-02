@@ -17,10 +17,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
-  "files": [
-    "node_modules/cache/src/cacheHttpClient.ts",
-    "node_modules/cache/src/tar.ts"
-  ],
   "include": [
     "src/**/*.ts"
   ]
