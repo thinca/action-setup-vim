@@ -1,7 +1,9 @@
 import * as core from "@actions/core";
 import {downloadTool} from "@actions/tool-cache";
 import {Octokit} from "@octokit/rest";
-import * as semver from "semver";
+import semverCoerce = require("semver/functions/coerce");
+import semverLte = require("semver/functions/lte");
+import {SemVer} from "semver";
 import {ActionError} from "../action_error";
 import {FixedVersion, Installer, InstallType} from "../interfaces";
 
@@ -13,9 +15,9 @@ function adjustSemver(ver: string): string {
   return ver.replace(/\.0*(\d)/g, ".$1");
 }
 
-export function toSemver(ver: string): semver.SemVer | null {
+export function toSemver(ver: string): SemVer | null {
   if (/^v?\d/.test(ver)) {
-    return semver.coerce(adjustSemver(ver));
+    return semverCoerce(adjustSemver(ver));
   }
   return null;
 }
@@ -85,7 +87,7 @@ export abstract class ReleasesInstaller implements Installer {
           if (!releaseSemver) {
             return "skip";
           }
-          return semver.lte(vimSemVer, releaseSemver) ? "yes" : "done";
+          return semverLte(vimSemVer, releaseSemver) ? "yes" : "done";
         }
       );
     } else {
