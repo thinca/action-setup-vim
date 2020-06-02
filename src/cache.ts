@@ -9,13 +9,13 @@ import {TEMP_PATH} from "./temp";
 
 const actionVersion = "1.0.1";
 
-function makeKey(vimType: VimType, vimVersion: string): string {
-  return `${actionVersion}-${process.platform}-${vimType}-${vimVersion}`;
+function makeKey(vimType: VimType, isGUI: boolean, vimVersion: string): string {
+  return `${actionVersion}-${process.platform}-${vimType}-${isGUI ? "gui" : "cui"}-${vimVersion}`;
 }
 
-export async function restore(vimType: VimType, vimVersion: string, targetDirectory: string): Promise<boolean> {
+export async function restore(vimType: VimType, isGUI: boolean, vimVersion: string, targetDirectory: string): Promise<boolean> {
   const entry = await client.getCacheEntry([
-    makeKey(vimType, vimVersion),
+    makeKey(vimType, isGUI, vimVersion),
   ]);
 
   if (!entry?.archiveLocation) {
@@ -33,8 +33,8 @@ export async function restore(vimType: VimType, vimVersion: string, targetDirect
   return true;
 }
 
-export async function save(vimType: VimType, vimVersion: string, targetDirectory: string): Promise<void> {
-  const key = makeKey(vimType, vimVersion);
+export async function save(vimType: VimType, isGUI: boolean, vimVersion: string, targetDirectory: string): Promise<void> {
+  const key = makeKey(vimType, isGUI, vimVersion);
   const cacheId = await client.reserveCache(key);
 
   if (cacheId == -1) {
