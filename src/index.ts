@@ -35,7 +35,7 @@ async function main(): Promise<void> {
   if (!installed) {
     await io.mkdirP(installPath);
 
-    const useCache = !download && core.getInput("cache") === "true";
+    const useCache = installer.installType == "build" && core.getInput("cache") === "true";
 
     if (useCache) {
       const cacheExists = await cache.restore(vimType, fixedVersion, installPath);
