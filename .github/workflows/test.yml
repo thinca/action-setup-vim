@@ -7,20 +7,12 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
       - uses: 'actions/checkout@v2'
-      - name: 'Cache actions'
-        id: 'action-js'
-        uses: 'actions/cache@v1'
-        with:
-          path: './actions'
-          key: '${{ github.sha }}'
       - name: 'Cache node packages'
-        uses: 'actions/cache@v1'
-        if: "steps.action-js.outputs.cache-hit != 'true'"
+        uses: 'actions/cache@v2'
         with:
           path: '~/.npm'
           key: "${{ hashFiles('package-lock.json') }}-${{ hashFiles('.github/actions/check-version/package-lock.json') }}"
       - name: 'Build actions'
-        if: "steps.action-js.outputs.cache-hit != 'true'"
         run: |
           npm ci
           npm run --silent build
@@ -32,6 +24,11 @@ jobs:
           npm run --silent build
           mkdir -p ${GITHUB_WORKSPACE}/actions/check-version
           cp action.js action.yml ${GITHUB_WORKSPACE}/actions/check-version
+      - name: 'Upload actions as artifact'
+        uses: 'actions/upload-artifact@v2'
+        with:
+          name: 'actions'
+          path: 'actions'
 
   test:
     name: '${{ matrix.gui_cui }}/${{ matrix.dl_bd }}: ${{ matrix.vim_type }} ${{ matrix.vim_version }} on ${{ matrix.platform }}'
@@ -112,12 +109,11 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: 'Restore actions'
-        id: 'action-js'
-        uses: 'actions/cache@v1'
+      - name: 'Download actions'
+        uses: 'actions/download-artifact@v2'
         with:
-          path: './actions'
-          key: '${{ github.sha }}'
+          name: 'actions'
+          path: 'actions'
       - name: 'Setup Vim'
         id: 'vim'
         uses: './actions/setup-vim'
