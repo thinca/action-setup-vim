@@ -8,7 +8,7 @@ jobs:
     steps:
       - uses: 'actions/checkout@v2'
       - name: 'Cache node packages'
-        uses: 'actions/cache@v1'
+        uses: 'actions/cache@v2'
         with:
           path: '~/.npm'
           key: "${{ hashFiles('package-lock.json') }}-${{ hashFiles('.github/actions/check-version/package-lock.json') }}"
