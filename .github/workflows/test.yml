@@ -122,6 +122,7 @@ jobs:
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
           download: '${{ matrix.download }}'
+          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
       - name: 'Check Vim version'
         uses: './actions/check-version'
         with:
