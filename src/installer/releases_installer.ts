@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import {downloadTool} from "@actions/tool-cache";
-import {Octokit} from "@octokit/rest";
+import {Octokit, RestEndpointMethodTypes} from "@octokit/rest";
 import semverCoerce = require("semver/functions/coerce");
 import semverLte = require("semver/functions/lte");
 import {SemVer} from "semver";
@@ -8,6 +8,7 @@ import {ActionError} from "../action_error";
 import {FixedVersion, Installer, InstallType} from "../interfaces";
 
 type TargetVersionResult = "skip" | "yes" | "done";
+export type Release = RestEndpointMethodTypes["repos"]["listReleases"]["response"]["data"][number];
 
 // semver disallow extra leading zero.
 // v8.2.0000 -> v8.2.0
@@ -26,7 +27,7 @@ export abstract class ReleasesInstaller implements Installer {
   abstract readonly repository: string;
   abstract readonly assetNamePattern: RegExp;
   abstract getExecutableName(): string;
-  abstract toSemverString(release: Octokit.ReposGetReleaseResponse): string;
+  abstract toSemverString(release: Release): string;
   abstract async install(vimVersion: FixedVersion): Promise<void>;
   abstract getPath(vimVersion: FixedVersion): string;
 
@@ -35,7 +36,7 @@ export abstract class ReleasesInstaller implements Installer {
   readonly isGUI: boolean;
 
   private _octokit?: Octokit;
-  private releases: { [key: string]: Octokit.ReposGetReleaseResponse } = {};
+  private releases: { [key: string]: Release } = {};
 
   constructor(installDir: string, isGUI: boolean) {
     this.installDir = installDir;
@@ -52,7 +53,7 @@ export abstract class ReleasesInstaller implements Installer {
     return actualVersion as FixedVersion;
   }
 
-  async findRelease(vimVersion: string): Promise<[Octokit.ReposGetReleaseResponse, string]> {
+  async findRelease(vimVersion: string): Promise<[Release, string]> {
     const [owner, repo] = this.repository.split("/");
 
     const isHead = vimVersion === "head";
@@ -81,7 +82,7 @@ export abstract class ReleasesInstaller implements Installer {
     if (vimSemVer) {
       return await this.resolveVersionFromReleases(
         owner, repo,
-        (release: Octokit.ReposGetReleaseResponse) => {
+        (release: Release) => {
           const releaseVersion = this.toSemverString(release);
           const releaseSemver = toSemver(releaseVersion);
           if (!releaseSemver) {
@@ -98,31 +99,26 @@ export abstract class ReleasesInstaller implements Installer {
   private async resolveVersionFromReleases(
     owner: string,
     repo: string,
-    getTargetVersion: (release: Octokit.ReposGetReleaseResponse) => TargetVersionResult,
-  ): Promise<[Octokit.ReposGetReleaseResponse, string]> {
+    getTargetVersion: (release: Release) => TargetVersionResult,
+  ): Promise<[Release, string]> {
     const octokit = this.octokit();
-    const listReleasesOptions = octokit.repos.listReleases.endpoint.merge({owner, repo});
-    type Res = Octokit.ReposListReleasesResponse;
-    const releases: Octokit.ReposGetReleaseResponse[] =
-      await octokit.paginate(listReleasesOptions, ({data: releases}: {data: Res}, done) => {
-        const targets = [];
-        for (const release of releases) {
-          if (release.assets.length === 0) {
-            continue;
-          }
-          const result = getTargetVersion(release);
-          if (result === "skip") {
-            continue;
-          }
-          if (result === "yes") {
-            targets.push(release);
-          } else {
-            done();
-            break;
-          }
+    const releases: Release[] = [];
+    for await (const {data: resReleases} of octokit.paginate.iterator(octokit.repos.listReleases, {owner, repo})) {
+      for (const release of resReleases) {
+        if (release.assets.length === 0) {
+          continue;
         }
-        return targets;
-      });
+        const result = getTargetVersion(release);
+        if (result === "skip") {
+          continue;
+        }
+        if (result === "yes") {
+          releases.push(release);
+        } else {
+          break;
+        }
+      }
+    }
 
     if (releases.length === 0) {
       throw new ActionError("Target release not found");
@@ -133,7 +129,7 @@ export abstract class ReleasesInstaller implements Installer {
     return [targetRelease, targetVersion];
   }
 
-  private async resolveVersionFromTag(owner: string, repo: string, tag: string): Promise<[Octokit.ReposGetReleaseResponse, string]> {
+  private async resolveVersionFromTag(owner: string, repo: string, tag: string): Promise<[Release, string]> {
     const octokit = this.octokit();
     const {data: release} = await octokit.repos.getReleaseByTag({owner, repo, tag});
     const version = await this.perpetuateVersion(owner, repo, release);
@@ -143,7 +139,7 @@ export abstract class ReleasesInstaller implements Installer {
   private async perpetuateVersion(
     owner: string,
     repo: string,
-    release: Octokit.ReposGetReleaseResponse,
+    release: Release,
   ): Promise<string> {
     const version = this.toSemverString(release);
     if (toSemver(version)) {
