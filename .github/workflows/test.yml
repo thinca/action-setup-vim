@@ -29,6 +29,14 @@ jobs:
         with:
           name: 'actions'
           path: 'actions'
+      - name: 'Show GitHub API rate limit'
+        run: |
+          wget --method=GET \
+          --quiet --content-on-error \
+          --output-document=- \
+          --header 'Authorization: Bearer ${{ secrets.PERSONAL_GITHUB_TOKEN }}' \
+          --header 'Content-Type: application/json' \
+          'https://api.github.com/rate_limit'
 
   test:
     name: '${{ matrix.gui_cui }}/${{ matrix.dl_bd }}: ${{ matrix.vim_type }} ${{ matrix.vim_version }} on ${{ matrix.platform }}'
@@ -122,6 +130,7 @@ jobs:
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
           download: '${{ matrix.download }}'
+          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
       - name: 'Check Vim version'
         uses: './actions/check-version'
         with:
@@ -129,3 +138,19 @@ jobs:
           executable: '${{ steps.vim.outputs.executable }}'
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
+
+  show-limit-after:
+    name: 'Show GitHub API rate limit after test'
+    needs: 'test'
+    runs-on: 'ubuntu-latest'
+    timeout-minutes: 1
+    if: 'always()'
+    steps:
+      - name: 'Show GitHub API rate limit'
+        run: |
+          wget --method=GET \
+          --quiet --content-on-error \
+          --output-document=- \
+          --header 'Authorization: Bearer ${{ secrets.PERSONAL_GITHUB_TOKEN }}' \
+          --header 'Content-Type: application/json' \
+          'https://api.github.com/rate_limit'
