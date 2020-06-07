@@ -2,8 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import {exec} from "@actions/exec";
 import * as io from "@actions/io";
-import {Octokit} from "@octokit/rest";
-import {ReleasesInstaller} from "./releases_installer";
+import {ReleasesInstaller, Release} from "./releases_installer";
 import {FixedVersion} from "../interfaces";
 
 function checkPath(targetPath: string): boolean {
@@ -20,7 +19,7 @@ export class MacVimReleasesInstaller extends ReleasesInstaller {
   readonly assetNamePattern: RegExp = /^MacVim.*\.dmg$/;
   readonly vimVersionPattern: RegExp = /[vV]im\s+patch.*(\d+\.\d+\.\d+)/;
 
-  toSemverString(release: Octokit.ReposGetReleaseResponse): string {
+  toSemverString(release: Release): string {
     const matched = this.vimVersionPattern.exec(release.body);
     return matched?.[1] || "";
   }
