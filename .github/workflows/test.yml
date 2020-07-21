@@ -114,7 +114,7 @@ jobs:
 
     needs: 'setup-actions'
     runs-on: '${{ matrix.os }}'
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - name: 'Download actions'
