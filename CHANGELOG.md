@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Unreleased
+
+
 ## v1.0.2 - 2020-06-07
 
 - Fixed: Caching feature was always disabled.
