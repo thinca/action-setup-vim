@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Improved: Cache the GitHub Releases.
+  - API call is reduced.
 - Security: Update dependencies.
 
 
