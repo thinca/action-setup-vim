@@ -1,7 +1,7 @@
 {
   "name": "action-setup-vim",
   "description": "A GitHub Action for setting up Vim",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "thinca <thinca+npm@gmail.com>",
   "bugs": {
     "url": "https://github.com/thinca/action-setup-vim/issues"
