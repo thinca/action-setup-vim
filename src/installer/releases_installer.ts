@@ -1,4 +1,7 @@
 import * as core from "@actions/core";
+import * as fs from "fs";
+import * as path from "path";
+import * as cache from "@actions/cache";
 import {downloadTool} from "@actions/tool-cache";
 import {Octokit, RestEndpointMethodTypes} from "@octokit/rest";
 import semverCoerce = require("semver/functions/coerce");
@@ -6,8 +9,8 @@ import semverLte = require("semver/functions/lte");
 import {SemVer} from "semver";
 import {ActionError} from "../action_error";
 import {FixedVersion, Installer, InstallType} from "../interfaces";
+import {TEMP_PATH} from "../temp";
 
-type TargetVersionResult = "skip" | "yes" | "done";
 export type Release = RestEndpointMethodTypes["repos"]["listReleases"]["response"]["data"][number];
 
 // semver disallow extra leading zero.
@@ -48,92 +51,98 @@ export abstract class ReleasesInstaller implements Installer {
   }
 
   async resolveVersion(vimVersion: string): Promise<FixedVersion> {
-    const [release, actualVersion] = await this.findRelease(vimVersion);
+    const [owner, repo] = this.repository.split("/");
+    this.releases = await this.fetchReleases(owner, repo);
+
+    const release = await this.findRelease(vimVersion);
+    const actualVersion = await this.perpetuateVersion(owner, repo, release);
     this.releases[actualVersion] = release;
     return actualVersion as FixedVersion;
   }
 
-  async findRelease(vimVersion: string): Promise<[Release, string]> {
-    const [owner, repo] = this.repository.split("/");
-
+  private async findRelease(vimVersion: string): Promise<Release> {
     const isHead = vimVersion === "head";
     if (isHead) {
-      let first = true;
-      return await this.resolveVersionFromReleases(
-        owner, repo,
-        () => {
-          if (first) {
-            first = false;
-            return "yes";
-          }
-          return "done";
-        }
-      );
+      return this.releases.head;
     }
 
     const isLatest = vimVersion === "latest";
     if (isLatest) {
-      const octokit = this.octokit();
-      const {data: release} = await octokit.repos.getLatestRelease({owner, repo});
-      return [release, release.tag_name];
+      return Object
+        .values(this.releases)
+        .filter((release) => !release.draft && !release.prerelease)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
     }
 
     const vimSemVer = toSemver(vimVersion);
     if (vimSemVer) {
-      return await this.resolveVersionFromReleases(
-        owner, repo,
-        (release: Release) => {
-          const releaseVersion = this.toSemverString(release);
-          const releaseSemver = toSemver(releaseVersion);
-          if (!releaseSemver) {
-            return "skip";
-          }
-          return semverLte(vimSemVer, releaseSemver) ? "yes" : "done";
+      let targetRelease: Release | undefined = undefined;
+      for (const release of Object.values(this.releases).sort((a, b) => b.created_at.localeCompare(a.created_at))) {
+        const releaseVersion = this.toSemverString(release);
+        const releaseSemver = toSemver(releaseVersion);
+        if (!releaseSemver) {
+          continue;
         }
-      );
+        if (semverLte(vimSemVer, releaseSemver)) {
+          targetRelease = release;
+        } else {
+          break;
+        }
+      }
+      if (!targetRelease) {
+        throw new ActionError("Target release not found");
+      }
+      return targetRelease;
     } else {
-      return await this.resolveVersionFromTag(owner, repo, vimVersion);
+      return this.releases[vimVersion];
     }
   }
 
-  private async resolveVersionFromReleases(
+  private async fetchReleases(
     owner: string,
     repo: string,
-    getTargetVersion: (release: Release) => TargetVersionResult,
-  ): Promise<[Release, string]> {
+  ): Promise<{ [key: string]: Release }> {
+    let releases: { [key: string]: Release } = {};
+
+    const cachePath = path.join(TEMP_PATH, `release-cache-${this.repository.replace(/^.+\//, "")}.json`);
+    const restoreKey = `releases--${this.repository}--`;
+    const cacheExists = await cache.restoreCache([cachePath], restoreKey, [restoreKey]);
+    if (cacheExists) {
+      releases = JSON.parse(fs.readFileSync(cachePath, {encoding: "utf8"})) as {string: Release};
+    }
+
+    let updated = false;
     const octokit = this.octokit();
-    const releases: Release[] = [];
+    fetching:
     for await (const {data: resReleases} of octokit.paginate.iterator(octokit.repos.listReleases, {owner, repo})) {
       for (const release of resReleases) {
         if (release.assets.length === 0) {
           continue;
         }
-        const result = getTargetVersion(release);
-        if (result === "skip") {
-          continue;
-        }
-        if (result === "yes") {
-          releases.push(release);
+        if (releases[release.tag_name]) {
+          break fetching;
         } else {
-          break;
+          releases[release.tag_name] = release;
+          if (!updated) {
+            releases.head = release;
+            updated = true;
+          }
         }
       }
     }
 
-    if (releases.length === 0) {
-      throw new ActionError("Target release not found");
+    if (updated) {
+      fs.writeFileSync(cachePath, JSON.stringify(releases));
+      try {
+        await cache.saveCache([cachePath], `releases--${this.repository}--${Object.keys(releases).length}`);
+      } catch (e) {
+        if (!(/Cache already exists/.test(e.message))) {
+          throw e;
+        }
+      }
     }
 
-    const targetRelease = releases[releases.length - 1];
-    const targetVersion = await this.perpetuateVersion(owner, repo, targetRelease);
-    return [targetRelease, targetVersion];
-  }
-
-  private async resolveVersionFromTag(owner: string, repo: string, tag: string): Promise<[Release, string]> {
-    const octokit = this.octokit();
-    const {data: release} = await octokit.repos.getReleaseByTag({owner, repo, tag});
-    const version = await this.perpetuateVersion(owner, repo, release);
-    return [release, version];
+    return releases;
   }
 
   private async perpetuateVersion(
