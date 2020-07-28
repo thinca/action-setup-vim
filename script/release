@@ -53,6 +53,9 @@ tag_message="${new_version_header}
 
 ${release_note}"
 
+git checkout master
+git merge --no-edit --no-ff develop
+
 sed -i -e "s/^## Unreleased$/## ${new_version_header}/" CHANGELOG.md
 git add CHANGELOG.md
 sed -i -e "s/^const actionVersion = \".\\+\";$/const actionVersion = \"${version}\";/" src/index.ts
@@ -61,7 +64,7 @@ update-package-version package.json "${version}"
 update-package-version package-lock.json "${version}"
 
 git commit -m "v${version}"
-git checkout master
-git merge --no-edit --no-ff develop
 echo "${tag_message}" | git tag -s -F - "v${version}+src"
+
 git checkout develop
+git merge --no-edit --no-ff master
