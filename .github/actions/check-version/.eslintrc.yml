@@ -1,3 +1,4 @@
+root: true  # Do not read the .eslintrc.yml on repository root
 env:
   es6: true
   node: true
