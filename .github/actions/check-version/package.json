@@ -29,22 +29,6 @@
   ],
   "license": "Zlib",
   "main": "index.js",
-  "nyc": {
-    "extension": [
-      ".ts"
-    ],
-    "all": true,
-    "require": [
-      "ts-node/register"
-    ],
-    "include": [
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "**/*.d.ts",
-      "test/**/*.ts"
-    ]
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thinca/setup-vim-action.git"
