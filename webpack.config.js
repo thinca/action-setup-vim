@@ -1,4 +1,5 @@
 const webpack = require("webpack");
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
   entry: "./src/index.ts",
@@ -27,6 +28,15 @@ module.exports = {
   },
   mode: "development",
   devtool: false,
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          keep_fnames: /^AbortSignal$/,
+        },
+      }),
+    ],
+  },
   plugins: [
     new webpack.NormalModuleReplacementPlugin(
       /universal-user-agent[/\\]dist-web[/\\]index\.js/,

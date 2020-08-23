@@ -15,7 +15,7 @@ jobs:
       - name: 'Build actions'
         run: |
           npm ci
-          npm run --silent build
+          npm run --silent build -- --mode=production
           mkdir -p ${GITHUB_WORKSPACE}/actions/setup-vim
           cp action.js action.yml ${GITHUB_WORKSPACE}/actions/setup-vim
 

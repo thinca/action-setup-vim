@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Unreleased
+
+- Fixed: Setup fails sometimes.
+- Security: Update dependencies.
+
+
 ## v1.0.3 - 2020-07-29
 
 - Improved: Cache the GitHub Releases.
