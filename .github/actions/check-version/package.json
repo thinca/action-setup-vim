@@ -1,6 +1,6 @@
 {
   "name": "action-check-vim-version",
-  "description": "A GitHub Action for setting up Vim",
+  "description": "A GitHub Action for checking version of Vim",
   "version": "0.0.0",
   "author": "thinca <thinca+npm@gmail.com>",
   "bugs": {
