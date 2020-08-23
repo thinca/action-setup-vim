@@ -29,6 +29,7 @@
   ],
   "license": "Zlib",
   "main": "index.js",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thinca/setup-vim-action.git"
