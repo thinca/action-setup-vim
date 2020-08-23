@@ -1,6 +1,6 @@
 {
   "name": "action-check-vim-version",
-  "description": "A GitHub Action for setting up Vim",
+  "description": "A GitHub Action for checking version of Vim",
   "version": "0.0.0",
   "author": "thinca <thinca+npm@gmail.com>",
   "bugs": {
@@ -29,22 +29,7 @@
   ],
   "license": "Zlib",
   "main": "index.js",
-  "nyc": {
-    "extension": [
-      ".ts"
-    ],
-    "all": true,
-    "require": [
-      "ts-node/register"
-    ],
-    "include": [
-      "src/**/*.ts"
-    ],
-    "exclude": [
-      "**/*.d.ts",
-      "test/**/*.ts"
-    ]
-  },
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thinca/setup-vim-action.git"
