@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+- Security: Update dependencies.
+
+
 ## v1.0.4 - 2020-08-24
 
 - Fixed: Setup fails sometimes.
