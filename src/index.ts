@@ -8,7 +8,7 @@ import * as cache from "@actions/cache";
 import {getInstaller} from "./get_installer";
 import {TEMP_PATH} from "./temp";
 
-const actionVersion = "1.0.4";
+const actionVersion = "1.0.5";
 
 function makeCacheKey(vimType: VimType, isGUI: boolean, vimVersion: string): string {
   return `${actionVersion}-${process.platform}-${vimType}-${isGUI ? "gui" : "cui"}-${vimVersion}`;
