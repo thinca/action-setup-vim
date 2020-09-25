@@ -18,7 +18,8 @@ jobs:
         run: |
           set -x
 
-          ORIGINAL_TAG=${GITHUB_REF##*/}
+          GITHUB_SHA=${{ github.event.workflow_run.head_commit.id }}
+          ORIGINAL_TAG=${{ github.event.workflow_run.head_branch }}
           PATCH_VER=${ORIGINAL_TAG%+src}
           MINOR_VER=${PATCH_VER%.*}
           MAJOR_VER=${MINOR_VER%.*}
