@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+
+
 ## v1.0.6 - 2020-11-03
 
 - Fixed: Follow to latest MacOS environment of GitHub Actions.
