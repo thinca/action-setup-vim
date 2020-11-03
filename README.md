@@ -205,6 +205,11 @@ e.g. `v8.2.0123` `v0.4.3` `49cd750d6a72efc0571a89d7a874bbb01081227f`
 Install was done with `build` or `download`.
 
 
+#### `cache_hit`
+
+When `cache` is enabled and cache was found, this is `true`.  Otherwise this is `false`.
+
+
 ## License
 
 [zlib License](LICENSE.txt)

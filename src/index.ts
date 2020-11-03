@@ -39,6 +39,8 @@ async function main(): Promise<void> {
     // path not exist
   }
 
+  let cacheHit: string | undefined;
+
   if (!installed) {
     if (process.platform === "darwin") {
       // Workaround:
@@ -53,8 +55,8 @@ async function main(): Promise<void> {
     const useCache = installer.installType == "build" && core.getInput("cache") === "true";
 
     if (useCache) {
-      const cacheExists = await cache.restoreCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion), []);
-      if (!cacheExists) {
+      cacheHit = await cache.restoreCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion), []);
+      if (!cacheHit) {
         await installer.install(fixedVersion);
         core.saveState("version", fixedVersion);
         core.saveState("install_path", installPath);
@@ -69,6 +71,7 @@ async function main(): Promise<void> {
   core.setOutput("actual_vim_version", fixedVersion);
   core.setOutput("executable", installer.getExecutableName());
   core.setOutput("install_type", installer.installType);
+  core.setOutput("cache_hit", cacheHit ? "true" : "false");
 }
 
 async function post(): Promise<void> {
