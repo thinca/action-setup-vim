@@ -25,6 +25,7 @@ jobs:
           MAJOR_VER=${MINOR_VER%.*}
 
           git fetch --no-tags --force origin tag ${ORIGINAL_TAG}
+          git reset --hard ${ORIGINAL_TAG}
 
           SUBJECT="$(git tag --list "${ORIGINAL_TAG}" --format="%(contents:subject)")"
           SUBJECT_JSON=$(echo -n "${SUBJECT}" | jq --raw-input --slurp .)
