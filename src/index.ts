@@ -85,6 +85,7 @@ async function main(): Promise<void> {
   core.setOutput("actual_vim_version", fixedVersion);
   core.setOutput("executable", installer.getExecutableName());
   core.setOutput("install_type", installer.installType);
+  core.setOutput("install_path", installPath);
   core.setOutput("cache_hit", cacheHit ? "true" : "false");
 }
 
