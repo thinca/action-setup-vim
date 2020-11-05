@@ -52,7 +52,8 @@ async function main(): Promise<void> {
 
     await io.mkdirP(installPath);
 
-    const useCache = installer.installType == "build" && core.getInput("cache") === "true";
+    const cacheInput = core.getInput("cache");
+    const useCache = installer.installType == "build" && cacheInput === "true";
 
     if (useCache) {
       cacheHit = await cache.restoreCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion, download), []);
@@ -64,6 +65,19 @@ async function main(): Promise<void> {
     } else {
       core.info("Cache disabled");
       await installer.install(fixedVersion);
+
+      // For test: Do not read cache but write immediately for next step.
+      if (cacheInput === "test") {
+        try {
+          await cache.saveCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion, download));
+        } catch (e) {
+          if (e instanceof cache.ReserveCacheError) {
+            core.debug(`${e.name}: ${e.message}`);
+          } else {
+            throw e;
+          }
+        }
+      }
     }
   }
 
