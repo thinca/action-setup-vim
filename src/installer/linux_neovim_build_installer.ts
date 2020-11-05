@@ -14,7 +14,7 @@ export class LinuxNeovimBuildInstaller extends NeovimBuildInstaller {
     ];
     await exec("sudo", ["apt-get", "install", ...packages]);
     await gitClone("neovim/neovim", vimVersion, reposPath);
-    await exec("make", ["CMAKE_BUILD_TYPE=Release", `CMAKE_EXTRA_FLAGS=-DCMAKE_INSTALL_PREFIX=${this.installDir}`], {cwd: reposPath});
+    await exec("make", ["CMAKE_BUILD_TYPE=RelWithDebInfo", `CMAKE_EXTRA_FLAGS=-DCMAKE_INSTALL_PREFIX=${this.installDir}`], {cwd: reposPath});
     await exec("make", ["install"], {cwd: reposPath});
   }
 }
