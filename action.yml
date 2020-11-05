@@ -70,6 +70,13 @@ outputs:
   install_type:
     description: |-
       Install was done with `build` or `download`.
+  install_path:
+    description: |-
+      Base path of installed Vim.
+      Note that this does not point to `bin`.
+  cache_hit:
+    description: |-
+      When `cache` is enabled and cache was found, this is `true`.  Otherwise this is `false`.
 
 branding:
   icon: 'edit'
