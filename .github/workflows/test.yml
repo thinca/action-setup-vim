@@ -120,6 +120,9 @@ jobs:
     needs: 'setup-actions'
     runs-on: '${{ matrix.os }}'
     timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: 'Download actions'
@@ -135,6 +138,7 @@ jobs:
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
           download: '${{ matrix.download }}'
+          cache: 'test'
           github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
       - name: 'Check Vim version'
         uses: './actions/check-version'
@@ -143,6 +147,29 @@ jobs:
           executable: '${{ steps.vim.outputs.executable }}'
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
+      - name: 'Delete installed Vim to reinstall'
+        if: "matrix.download == 'never'"
+        run: |
+          rm -fr "${{ steps.vim.outputs.install_path }}"
+      - name: 'Setup Vim with cache'
+        id: 'vim_with_cache'
+        if: "matrix.download == 'never'"
+        uses: './actions/setup-vim'
+        with:
+          vim_version: '${{ matrix.version || matrix.vim_version }}'
+          vim_type: '${{ matrix.vim_type }}'
+          gui: '${{ matrix.gui }}'
+          download: '${{ matrix.download }}'
+          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
+      - name: 'Check Setup Vim is done with cache'
+        if: "matrix.download == 'never'"
+        run: |
+          if [[ "${{ steps.vim_with_cache.outputs.cache_hit }}" == "true" ]]; then
+            echo "Cache hit!"
+          else
+            echo "Cache not hit..."
+            exit 1
+          fi
 
   show-limit-after:
     name: 'Show GitHub API rate limit after test'
