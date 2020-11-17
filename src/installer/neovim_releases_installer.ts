@@ -11,16 +11,23 @@ export abstract class NeovimReleasesInstaller extends SemverReleasesInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
     const archiveFilePath = await this.downloadAsset(vimVersion);
     const ext = path.extname(archiveFilePath).toLowerCase();
-    const installDir =
-      ext === ".zip" ?
-        await extractZip(archiveFilePath, this.installDir) :
-        await extractTar(archiveFilePath, this.installDir);
-    const dirs = fs.readdirSync(installDir);
-    if (dirs.length !== 1) {
-      throw new Error(`Unexpected archive entries: ${JSON.stringify(dirs)}`);
+    if (ext === ".appimage") {
+      fs.mkdirSync(path.join(this.installDir, "bin"));
+      const executablePath = path.join(this.installDir, "bin", "nvim");
+      fs.renameSync(archiveFilePath, executablePath);
+      fs.chmodSync(executablePath, 0o755);
+    } else {
+      const installDir =
+        ext === ".zip" ?
+          await extractZip(archiveFilePath, this.installDir) :
+          await extractTar(archiveFilePath, this.installDir);
+      const dirs = fs.readdirSync(installDir);
+      if (dirs.length !== 1) {
+        throw new Error(`Unexpected archive entries: ${JSON.stringify(dirs)}`);
+      }
+      await exec("bash", ["-c", `mv '${dirs[0]}'/* .`], {cwd: installDir});
+      fs.rmdirSync(path.join(installDir, dirs[0]));
     }
-    await exec("bash", ["-c", `mv '${dirs[0]}'/* .`], {cwd: installDir});
-    fs.rmdirSync(path.join(installDir, dirs[0]));
   }
 
   getPath(): string {
