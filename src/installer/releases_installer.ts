@@ -28,7 +28,7 @@ export function toSemver(ver: string): SemVer | null {
 
 export abstract class ReleasesInstaller implements Installer {
   abstract readonly repository: string;
-  abstract readonly assetNamePattern: RegExp;
+  abstract readonly assetNamePatterns: RegExp[];
   abstract getExecutableName(): string;
   abstract toSemverString(release: Release): string;
   abstract async install(vimVersion: FixedVersion): Promise<void>;
@@ -189,13 +189,14 @@ export abstract class ReleasesInstaller implements Installer {
     if (!release) {
       throw new ActionError(`Unknown version: ${vimVersion}`);
     }
-    const asset = release.assets.find(asset => this.assetNamePattern.test(asset.name));
+    const asset = this.assetNamePatterns.map(pattern => release.assets.find(asset => pattern.test(asset.name))).find(v => v);
     if (!asset) {
       const assetNames = release.assets.map(asset => asset.name);
-      throw new ActionError(`Target asset not found: /${this.assetNamePattern.source}/ in ${JSON.stringify(assetNames)}`);
+      throw new ActionError(`Target asset not found: /${this.assetNamePatterns.map(p => p.source).join("|")}/ in ${JSON.stringify(assetNames)}`);
     }
     const url = asset.browser_download_url;
-    return await downloadTool(url);
+    const dest = path.join(TEMP_PATH, this.repository, vimVersion, asset.name);
+    return await downloadTool(url, dest);
   }
 
   private octokit(): Octokit {
