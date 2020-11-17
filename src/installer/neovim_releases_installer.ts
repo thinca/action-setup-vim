@@ -7,12 +7,12 @@ import {FixedVersion} from "../interfaces";
 
 export abstract class NeovimReleasesInstaller extends SemverReleasesInstaller {
   readonly repository: string = "neovim/neovim";
-  abstract readonly archiveType: "zip" | "tar";
 
   async install(vimVersion: FixedVersion): Promise<void> {
     const archiveFilePath = await this.downloadAsset(vimVersion);
+    const ext = path.extname(archiveFilePath).toLowerCase();
     const installDir =
-      this.archiveType === "zip" ?
+      ext === ".zip" ?
         await extractZip(archiveFilePath, this.installDir) :
         await extractTar(archiveFilePath, this.installDir);
     const dirs = fs.readdirSync(installDir);

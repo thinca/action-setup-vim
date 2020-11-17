@@ -195,7 +195,8 @@ export abstract class ReleasesInstaller implements Installer {
       throw new ActionError(`Target asset not found: /${this.assetNamePattern.source}/ in ${JSON.stringify(assetNames)}`);
     }
     const url = asset.browser_download_url;
-    return await downloadTool(url);
+    const dest = path.join(TEMP_PATH, this.repository, vimVersion, asset.name);
+    return await downloadTool(url, dest);
   }
 
   private octokit(): Octokit {
