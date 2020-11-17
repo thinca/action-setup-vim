@@ -72,7 +72,7 @@ async function main(): Promise<void> {
           await cache.saveCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion, download));
         } catch (e) {
           if (e instanceof cache.ReserveCacheError) {
-            core.debug(`${e.name}: ${e.message}`);
+            core.debug(`Error while caching binary in test: ${e.name}: ${e.message}`);
           } else {
             throw e;
           }
@@ -100,7 +100,9 @@ async function post(): Promise<void> {
       try {
         await cache.saveCache([installPath], makeCacheKey(vimType, isGUI, version, download));
       } catch (e) {
-        if (!(/Cache already exists/.test(e.message))) {
+        if (e instanceof cache.ReserveCacheError) {
+          core.debug(`Error while caching binary in post: ${e.name}: ${e.message}`);
+        } else {
           throw e;
         }
       }
