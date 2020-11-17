@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## Unreleased
+
+- Added: `install_path` outout.
+- Added: `cache_hit` outout.
+- Improved: Improve for old version of Neovim.
+- Fixed: Caching problem when multiple jobs run.
+- Security: Update dependencies.
+
+
 ## v1.0.6 - 2020-11-03
 
 - Fixed: Follow to latest MacOS environment of GitHub Actions.

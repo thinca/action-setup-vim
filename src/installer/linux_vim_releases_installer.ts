@@ -9,7 +9,7 @@ const AVAILABLE_VERSION = toSemver("v8.1.1239");
 
 export class LinuxVimReleasesInstaller extends SemverReleasesInstaller {
   readonly repository: string = "vim/vim-appimage";
-  readonly assetNamePattern: RegExp = /\.AppImage$/;
+  readonly assetNamePatterns: RegExp[] = [/\.AppImage$/];
 
   getExecutableName(): string {
     return this.isGUI ? "gvim" : "vim";

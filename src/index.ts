@@ -10,8 +10,8 @@ import {TEMP_PATH} from "./temp";
 
 const actionVersion = "1.0.6";
 
-function makeCacheKey(vimType: VimType, isGUI: boolean, vimVersion: string): string {
-  return `${actionVersion}-${process.platform}-${vimType}-${isGUI ? "gui" : "cui"}-${vimVersion}`;
+function makeCacheKey(vimType: VimType, isGUI: boolean, vimVersion: string, download: string): string {
+  return `${actionVersion}-${process.platform}-${vimType}-${isGUI ? "gui" : "cui"}-${download}-${vimVersion}`;
 }
 
 
@@ -39,6 +39,8 @@ async function main(): Promise<void> {
     // path not exist
   }
 
+  let cacheHit: string | undefined;
+
   if (!installed) {
     if (process.platform === "darwin") {
       // Workaround:
@@ -50,11 +52,12 @@ async function main(): Promise<void> {
 
     await io.mkdirP(installPath);
 
-    const useCache = installer.installType == "build" && core.getInput("cache") === "true";
+    const cacheInput = core.getInput("cache");
+    const useCache = installer.installType == "build" && cacheInput === "true";
 
     if (useCache) {
-      const cacheExists = await cache.restoreCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion), []);
-      if (!cacheExists) {
+      cacheHit = await cache.restoreCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion, download), []);
+      if (!cacheHit) {
         await installer.install(fixedVersion);
         core.saveState("version", fixedVersion);
         core.saveState("install_path", installPath);
@@ -62,6 +65,19 @@ async function main(): Promise<void> {
     } else {
       core.info("Cache disabled");
       await installer.install(fixedVersion);
+
+      // For test: Do not read cache but write immediately for next step.
+      if (cacheInput === "test") {
+        try {
+          await cache.saveCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion, download));
+        } catch (e) {
+          if (e instanceof cache.ReserveCacheError) {
+            core.debug(`Error while caching binary in test: ${e.name}: ${e.message}`);
+          } else {
+            throw e;
+          }
+        }
+      }
     }
   }
 
@@ -69,19 +85,24 @@ async function main(): Promise<void> {
   core.setOutput("actual_vim_version", fixedVersion);
   core.setOutput("executable", installer.getExecutableName());
   core.setOutput("install_type", installer.installType);
+  core.setOutput("install_path", installPath);
+  core.setOutput("cache_hit", cacheHit ? "true" : "false");
 }
 
 async function post(): Promise<void> {
   const version = core.getState("version");
   if (version) {
     const vimType = core.getInput("vim_type").toLowerCase();
+    const download = core.getInput("download");
     const isGUI = core.getInput("gui") === "yes";
     const installPath = core.getState("install_path");
     if (isVimType(vimType)) {
       try {
-        await cache.saveCache([installPath], makeCacheKey(vimType, isGUI, version));
+        await cache.saveCache([installPath], makeCacheKey(vimType, isGUI, version, download));
       } catch (e) {
-        if (!(/Cache already exists/.test(e.message))) {
+        if (e instanceof cache.ReserveCacheError) {
+          core.debug(`Error while caching binary in post: ${e.name}: ${e.message}`);
+        } else {
           throw e;
         }
       }

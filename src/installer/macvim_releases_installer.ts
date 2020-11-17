@@ -16,7 +16,7 @@ function checkPath(targetPath: string): boolean {
 
 export class MacVimReleasesInstaller extends ReleasesInstaller {
   readonly repository: string = "macvim-dev/macvim";
-  readonly assetNamePattern: RegExp = /^MacVim.*\.dmg$/;
+  readonly assetNamePatterns: RegExp[] = [/^MacVim.*\.dmg$/];
   readonly vimVersionPattern: RegExp = /[vV]im\s+patch.*(\d+\.\d+\.\d+)/;
 
   toSemverString(release: Release): string {
