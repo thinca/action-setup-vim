@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v1.0.7 - 2020-11-18
 
 - Added: `install_path` outout.
 - Added: `cache_hit` outout.
