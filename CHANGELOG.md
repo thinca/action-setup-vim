@@ -4,6 +4,7 @@
 
 - Added: `install_path` outout.
 - Added: `cache_hit` outout.
+- Fixed: Caching problem when multiple jobs run.
 - Security: Update dependencies.
 
 
