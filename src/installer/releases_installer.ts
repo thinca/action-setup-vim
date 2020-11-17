@@ -136,7 +136,9 @@ export abstract class ReleasesInstaller implements Installer {
       try {
         await cache.saveCache([cachePath], `releases--${this.repository}--${Object.keys(releases).length}`);
       } catch (e) {
-        if (!(/Cache already exists/.test(e.message))) {
+        if (e instanceof cache.ReserveCacheError) {
+          core.debug(`Error while caching releases: ${e.name}: ${e.message}`);
+        } else {
           throw e;
         }
       }
