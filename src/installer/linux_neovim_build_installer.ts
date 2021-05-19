@@ -25,6 +25,12 @@ export class LinuxNeovimBuildInstaller extends NeovimBuildInstaller {
       configureArgs.push("DEPS_CMAKE_FLAGS=-DUSE_BUNDLED=OFF -DUSE_BUNDLED_LIBVTERM=ON -DUSE_BUNDLED_UNIBILIUM=ON");
     }
 
+    // Workaround:
+    // GitHub-hosted runner has CMake 3.20.
+    // But, cannot build Neovim v0.4.4 with CMake 3.20.
+    // So delete it and use CMake 3.16 from apt-get.
+    await exec("sudo", ["rm", "-f", "/usr/local/bin/cmake"]);
+
     await exec("sudo", ["apt-get", "update"]);
     await exec("sudo", ["apt-get", "install", ...packages]);
     await exec("make", configureArgs, {cwd: reposPath});
