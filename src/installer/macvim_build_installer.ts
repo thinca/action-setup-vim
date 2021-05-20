@@ -31,6 +31,10 @@ export class MacVimBuildInstaller extends BuildInstaller {
     await gitClone("macvim-dev/macvim", tag, reposPath);
     const srcPath = path.join(reposPath, "src");
     await exec("./configure", [], {cwd: srcPath});
+
+    // To avoid `sed: RE error: illegal byte sequence` error.
+    await exec("sed", ["-i", "", "s/\\tsed/LC_CTYPE=C sed/", "po/Makefile"], {cwd: srcPath});
+
     await exec("make", [], {cwd: srcPath});
     await io.mkdirP(this.installDir);
     await io.cp(path.join(srcPath, "MacVim", "build", "Release", "MacVim.app"), this.installDir, {recursive: true});
