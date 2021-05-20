@@ -30,12 +30,14 @@ function timeout<T>(promise: Promise<T>, timeoutMilliseconds: number): Promise<T
 // v0.5.0-404-g49cd750d6 -> 49cd750d6
 // v0.5.0-dev+1330-gd16e9d8ed -> d16e9d8ed
 // v0.5.0-nightly -> nightly
+// v0.5.0-dev+nightly -> nightly
 // 49cd750d6a72efc0571a89d7a874bbb01081227f -> 49cd750d6a72efc0571a89d7a874bbb01081227f
 function normalizeVersion(str: string): string {
   if (str.indexOf(".") < 0) {
     return str;
   }
-  const matched = /^.*[+-]\d+-g([0-9a-f]{7,})$/.exec(str);
+  str = str.replace("dev+", "");
+  const matched = /^.*-\d+-g([0-9a-f]{7,})$/.exec(str);
   if (matched) {
     return matched[1];
   }
