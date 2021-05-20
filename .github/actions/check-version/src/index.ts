@@ -141,7 +141,7 @@ async function check(): Promise<string> {
   const normalizedExpectedVersion = normalizeVersion(expectedVimVersion);
 
   if (actualVersion === "nightly") {
-    return `Can not check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
+    return `Cannot check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
   }
   const isSha1 = /^[0-9a-f]{7,}$/.test(normalizedExpectedVersion);
   if (isSha1) {
