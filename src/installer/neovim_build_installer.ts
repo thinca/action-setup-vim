@@ -13,5 +13,5 @@ export abstract class NeovimBuildInstaller extends BuildInstaller {
     return path.join(this.installDir, "bin");
   }
 
-  abstract async install(vimVersion: FixedVersion): Promise<void>;
+  abstract install(vimVersion: FixedVersion): Promise<void>;
 }

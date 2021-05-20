@@ -31,7 +31,7 @@ export abstract class ReleasesInstaller implements Installer {
   abstract readonly assetNamePatterns: RegExp[];
   abstract getExecutableName(): string;
   abstract toSemverString(release: Release): string;
-  abstract async install(vimVersion: FixedVersion): Promise<void>;
+  abstract install(vimVersion: FixedVersion): Promise<void>;
   abstract getPath(vimVersion: FixedVersion): string;
 
   readonly installType = InstallType.download;

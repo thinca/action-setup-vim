@@ -8,6 +8,6 @@ export abstract class VimBuildInstaller extends BuildInstaller {
     return this.isGUI ? "gvim" : "vim";
   }
 
-  abstract async install(vimVersion: FixedVersion): Promise<void>;
+  abstract install(vimVersion: FixedVersion): Promise<void>;
   abstract getPath(vimVersion: FixedVersion): string;
 }

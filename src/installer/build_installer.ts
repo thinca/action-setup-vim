@@ -10,7 +10,7 @@ function isFixedVersion(vimVersion: string): boolean {
 export abstract class BuildInstaller implements Installer {
   abstract readonly repository: string;
   abstract getExecutableName(): string;
-  abstract async install(vimVersion: FixedVersion): Promise<void>;
+  abstract install(vimVersion: FixedVersion): Promise<void>;
   abstract getPath(vimVersion: FixedVersion): string;
 
   readonly installType = InstallType.build;
