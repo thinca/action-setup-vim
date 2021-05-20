@@ -4,6 +4,7 @@
 
 - Fixed: Building Neovim v0.4.4.
 - Fixed: Building was selected when Neovim's version is `stable` and `download` is `available`.
+- Security: Update dependencies.
 
 
 ## v1.0.7 - 2020-11-18
