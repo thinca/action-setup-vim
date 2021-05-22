@@ -5,6 +5,9 @@ export class LinuxNeovimReleasesInstaller extends NeovimReleasesInstaller {
   readonly assetNamePatterns: RegExp[] = [/^nvim-linux64\.tar\.gz$/, /^nvim\.appimage$/];
 
   canInstall(version: string): boolean {
+    if (version === "stable" || version === "nightly" || version === "head") {
+      return true;
+    }
     const semver = toSemver(version);
     return !!semver && 0 <= semver.compare("0.3.0");
   }

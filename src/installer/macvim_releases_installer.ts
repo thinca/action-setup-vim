@@ -20,7 +20,7 @@ export class MacVimReleasesInstaller extends ReleasesInstaller {
   readonly vimVersionPattern: RegExp = /[vV]im\s+patch.*(\d+\.\d+\.\d+)/;
 
   toSemverString(release: Release): string {
-    const matched = this.vimVersionPattern.exec(release.body);
+    const matched = this.vimVersionPattern.exec(release.body ?? "");
     return matched?.[1] || "";
   }
 
