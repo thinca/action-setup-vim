@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v1.0.9 - 2021-08-01
 
 - Security: Update dependencies.
 
