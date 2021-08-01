@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Security: Update dependencies.
 
 
 ## v1.0.8 - 2021-05-23
