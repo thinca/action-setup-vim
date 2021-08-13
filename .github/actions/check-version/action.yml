@@ -33,4 +33,3 @@ branding:
 runs:
   using: 'node12'
   main: 'action.js'
-
