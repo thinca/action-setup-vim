@@ -19,6 +19,11 @@ inputs:
     required: true
   executable:
     description: |-
+      The name of executable file.
+    required: true
+  executable_path:
+    description: |-
+      The full path of executable file.
     required: true
 
 branding:

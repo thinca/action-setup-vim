@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added: `executable_path` output.
 
 
 ## v1.0.9 - 2021-08-01
