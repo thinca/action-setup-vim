@@ -57,7 +57,7 @@ function _getInstaller(installDir: string, vimType: VimType, isGUI: boolean, isD
             return new MacVimBuildInstaller(installDir, isGUI);
           }
       }
-    // here is unreachable so can not put "break;"
+    // here is unreachable so cannot put "break;"
     // eslint-disable-next-line no-fallthrough
     case "win32":
       switch (vimType) {

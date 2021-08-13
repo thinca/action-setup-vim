@@ -100,7 +100,7 @@ async function getUnixGUIVersionOutput(executable: string): Promise<string> {
 }
 
 async function getGUIVersionOutput(vimType: string, executable: string): Promise<string> {
-  // XXX: MacVim with GUI can not be supported.
+  // XXX: MacVim with GUI cannot be supported.
   if (vimType === "neovim") {
     // GUI of Neovim is a wrapper for CUI version so we check just a CUI version
     return await getCUIVersionOutput("nvim");
@@ -150,7 +150,7 @@ async function check(): Promise<string> {
         return "Correct version installed";
       }
     } else {
-      return `Can not check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
+      return `Cannot check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
     }
   } else if (normalizedExpectedVersion === actualVersion) {
     return "Correct version installed";

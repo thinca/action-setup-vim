@@ -10,7 +10,7 @@ First, see [Code of Conduct](./CODE_OF_CONDUCT.md).
 There are some templates.
 Please choose a template and fill them.
 
-When you can not find an appropriate template, you do not have to use it.
+When you cannot find an appropriate template, you do not have to use it.
 
 
 ### About `question`
