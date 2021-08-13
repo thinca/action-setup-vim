@@ -194,6 +194,11 @@ When `gui` is yes, this points to GUI version.
 e.g. `vim` `nvim` `gvim`
 
 
+#### `executable_path`
+
+The full path of executable file.
+
+
 #### `actual_vim_version`
 
 Version of Vim actually installed.

@@ -63,6 +63,9 @@ outputs:
       This is not a full path, just name.
       When `gui` is yes, this points to GUI version.
       e.g. `vim` `nvim` `gvim`
+  executable_path:
+    description: |-
+      The full path of executable file.
   actual_vim_version:
     description: |-
       Version of Vim actually installed.
