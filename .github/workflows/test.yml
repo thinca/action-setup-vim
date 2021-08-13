@@ -145,6 +145,7 @@ jobs:
         with:
           expected_vim_version: '${{ steps.vim.outputs.actual_vim_version }}'
           executable: '${{ steps.vim.outputs.executable }}'
+          executable_path: '${{ steps.vim.outputs.executable_path }}'
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
       - name: 'Delete installed Vim to reinstall'
