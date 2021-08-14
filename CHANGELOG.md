@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v1.1.0 - 2021-08-14
 
 - Added: `executable_path` output.
 - Improved: Allow installs multiple different Vim at one environment.
