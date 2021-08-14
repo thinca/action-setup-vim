@@ -33,8 +33,8 @@ inputs:
     default: 'no'
   download:
     description: |-
-      When this is `always`, downloads the officialy released binary, or fail if unavailable.
-      When this is `available`, downloads the officialy released binary if available, otherwise builds from source code.
+      When this is `always`, downloads the officially released binary, or fail if unavailable.
+      When this is `available`, downloads the officially released binary if available, otherwise builds from source code.
       When this is `never`, always builds from source code.
     required: false
     default: 'available'
@@ -63,6 +63,9 @@ outputs:
       This is not a full path, just name.
       When `gui` is yes, this points to GUI version.
       e.g. `vim` `nvim` `gvim`
+  executable_path:
+    description: |-
+      The full path of executable file.
   actual_vim_version:
     description: |-
       Version of Vim actually installed.

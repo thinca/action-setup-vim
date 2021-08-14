@@ -16,8 +16,6 @@ function makeCacheKey(vimType: VimType, isGUI: boolean, vimVersion: string, down
 
 
 async function main(): Promise<void> {
-  const installPath = path.join(TEMP_PATH, "vim");
-
   const vimType = core.getInput("vim_type").toLowerCase();
   if (!isVimType(vimType)) {
     throw new ActionError(`Invalid vim_type: ${vimType}`);
@@ -26,6 +24,8 @@ async function main(): Promise<void> {
   const download = core.getInput("download");
   const isGUI = core.getInput("gui") === "yes";
   const inputVimVersion = core.getInput("vim_version");
+
+  const installPath = path.join(TEMP_PATH, vimType, inputVimVersion);
   const installer = getInstaller(installPath, vimType, isGUI, download, inputVimVersion);
 
   const fixedVersion = await installer.resolveVersion(inputVimVersion);
@@ -81,9 +81,14 @@ async function main(): Promise<void> {
     }
   }
 
-  core.addPath(installer.getPath(fixedVersion));
+  const binPath = installer.getPath(fixedVersion);
+  const executableName = installer.getExecutableName();
+  const executableFullName = executableName + (process.platform === "win32" ? ".exe" : "");
+
+  core.addPath(binPath);
   core.setOutput("actual_vim_version", fixedVersion);
-  core.setOutput("executable", installer.getExecutableName());
+  core.setOutput("executable", executableName);
+  core.setOutput("executable_path", path.join(binPath, executableFullName));
   core.setOutput("install_type", installer.installType);
   core.setOutput("install_path", installPath);
   core.setOutput("cache_hit", cacheHit ? "true" : "false");

@@ -100,7 +100,7 @@ async function getUnixGUIVersionOutput(executable: string): Promise<string> {
 }
 
 async function getGUIVersionOutput(vimType: string, executable: string): Promise<string> {
-  // XXX: MacVim with GUI can not be supported.
+  // XXX: MacVim with GUI cannot be supported.
   if (vimType === "neovim") {
     // GUI of Neovim is a wrapper for CUI version so we check just a CUI version
     return await getCUIVersionOutput("nvim");
@@ -127,9 +127,16 @@ async function check(): Promise<string> {
   const executable = core.getInput("executable");
   const expectedVimVersion = core.getInput("expected_vim_version");
 
+  const executablePath = core.getInput("executable_path");
+  if (!fs.existsSync(executablePath)) {
+    throw new Error(`"executable_path" does not exist: ${executablePath}`);
+  }
+
+  const vimFile = core.getInput("use_executable_path") === "yes" ? executablePath : executable;
+
   core.info(`Expected Version: ${expectedVimVersion}`);
 
-  const versionOutput = (await getVersionOutput(vimType, isGUI, executable)).trim();
+  const versionOutput = (await getVersionOutput(vimType, isGUI, vimFile)).trim();
 
   const actualVersion = extractVersionFromVersionOutput(versionOutput);
 
@@ -150,7 +157,7 @@ async function check(): Promise<string> {
         return "Correct version installed";
       }
     } else {
-      return `Can not check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
+      return `Cannot check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
     }
   } else if (normalizedExpectedVersion === actualVersion) {
     return "Correct version installed";

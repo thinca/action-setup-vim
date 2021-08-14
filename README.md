@@ -78,7 +78,7 @@ By default, uses `download` if available, otherwise uses `build`.
 | Windows | `build`    | `gvim` | Sources from [vim/vim][vim].                                       |
 | Windows | `download` | `gvim` | Releases from [vim/vim-win32-installer][win32-installer-releases]. |
 
-(*) Downloading Vim from AppImage is available from v8.1.1239.  Before v8.1.1234 can not start vim.  This was fixed by [vim/vim-appimage#6](https://github.com/vim/vim-appimage/pull/6).
+(*) Downloading Vim from AppImage is available from v8.1.1239.  Before v8.1.1234 cannot start vim.  This was fixed by [vim/vim-appimage#6](https://github.com/vim/vim-appimage/pull/6).
 
 
 #### Neovim
@@ -155,8 +155,8 @@ default: `no`
 
 #### `download`
 
-When this is `always`, downloads the officialy released binary, or fail if unavailable.
-When this is `available`, downloads the officialy released binary if available, otherwise builds from source code.
+When this is `always`, downloads the officially released binary, or fail if unavailable.
+When this is `available`, downloads the officially released binary if available, otherwise builds from source code.
 When this is `never`, always builds from source code.
 
 default: `available`
@@ -192,6 +192,11 @@ The name of executable file.
 This is not a full path, just name.
 When `gui` is yes, this points to GUI version.
 e.g. `vim` `nvim` `gvim`
+
+
+#### `executable_path`
+
+The full path of executable file.
 
 
 #### `actual_vim_version`

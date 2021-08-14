@@ -145,6 +145,7 @@ jobs:
         with:
           expected_vim_version: '${{ steps.vim.outputs.actual_vim_version }}'
           executable: '${{ steps.vim.outputs.executable }}'
+          executable_path: '${{ steps.vim.outputs.executable_path }}'
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
       - name: 'Delete installed Vim to reinstall'
@@ -171,9 +172,138 @@ jobs:
             exit 1
           fi
 
+  multiple-test:
+    name: 'Install multiple Vims on ${{ matrix.platform }}'
+    strategy:
+      matrix:
+        platform: ['Linux', 'MacOS', 'Windows']
+
+        include:
+          - platform: 'Linux'
+            os: 'ubuntu-latest'
+          - platform: 'MacOS'
+            os: 'macos-latest'
+          - platform: 'Windows'
+            os: 'windows-latest'
+      fail-fast: false
+
+    needs: 'setup-actions'
+    runs-on: '${{ matrix.os }}'
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: 'Download actions'
+        uses: 'actions/download-artifact@v2'
+        with:
+          name: 'actions'
+          path: 'actions'
+
+      - name: 'Setup Vim head'
+        id: 'vim_head'
+        uses: './actions/setup-vim'
+        with:
+          vim_version: 'head'
+          vim_type: 'Vim'
+          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
+      - name: 'Setup Vim latest'
+        id: 'vim_latest'
+        uses: './actions/setup-vim'
+        with:
+          vim_version: 'v8.2.0000'
+          vim_type: 'Vim'
+          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
+      - name: 'Setup Neovim head'
+        id: 'neovim_head'
+        uses: './actions/setup-vim'
+        with:
+          vim_version: 'head'
+          vim_type: 'Neovim'
+          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
+      - name: 'Setup Neovim latest'
+        id: 'neovim_latest'
+        uses: './actions/setup-vim'
+        with:
+          vim_version: 'v0.5.0'
+          vim_type: 'Neovim'
+          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
+      - name: 'Setup MacVim head'
+        if: "matrix.platform == 'MacOS'"
+        id: 'macvim_head'
+        uses: './actions/setup-vim'
+        with:
+          vim_version: 'head'
+          vim_type: 'MacVim'
+          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
+      - name: 'Setup MacVim latest'
+        if: "matrix.platform == 'MacOS'"
+        id: 'macvim_latest'
+        uses: './actions/setup-vim'
+        with:
+          vim_version: 'snapshot-162'
+          vim_type: 'MacVim'
+          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
+
+      - name: 'Check Vim head version'
+        if: "always() && steps.vim_head.conclusion == 'success'"
+        uses: './actions/check-version'
+        with:
+          expected_vim_version: '${{ steps.vim_head.outputs.actual_vim_version }}'
+          executable: '${{ steps.vim_head.outputs.executable }}'
+          executable_path: '${{ steps.vim_head.outputs.executable_path }}'
+          vim_type: 'Vim'
+          use_executable_path: 'yes'
+      - name: 'Check Vim latest version'
+        if: "always() && steps.vim_latest.conclusion == 'success'"
+        uses: './actions/check-version'
+        with:
+          expected_vim_version: '${{ steps.vim_latest.outputs.actual_vim_version }}'
+          executable: '${{ steps.vim_latest.outputs.executable }}'
+          executable_path: '${{ steps.vim_latest.outputs.executable_path }}'
+          vim_type: 'Vim'
+          use_executable_path: 'yes'
+      - name: 'Check Neovim head version'
+        if: "always() && steps.neovim_head.conclusion == 'success'"
+        uses: './actions/check-version'
+        with:
+          expected_vim_version: '${{ steps.neovim_head.outputs.actual_vim_version }}'
+          executable: '${{ steps.neovim_head.outputs.executable }}'
+          executable_path: '${{ steps.neovim_head.outputs.executable_path }}'
+          vim_type: 'Neovim'
+          use_executable_path: 'yes'
+      - name: 'Check Neovim latest version'
+        if: "always() && steps.neovim_latest.conclusion == 'success'"
+        uses: './actions/check-version'
+        with:
+          expected_vim_version: '${{ steps.neovim_latest.outputs.actual_vim_version }}'
+          executable: '${{ steps.neovim_latest.outputs.executable }}'
+          executable_path: '${{ steps.neovim_latest.outputs.executable_path }}'
+          vim_type: 'Neovim'
+          use_executable_path: 'yes'
+      - name: 'Check MacVim head version'
+        if: "always() && steps.macvim_head.conclusion == 'success'"
+        uses: './actions/check-version'
+        with:
+          expected_vim_version: '${{ steps.macvim_head.outputs.actual_vim_version }}'
+          executable: '${{ steps.macvim_head.outputs.executable }}'
+          executable_path: '${{ steps.macvim_head.outputs.executable_path }}'
+          vim_type: 'MacVim'
+          use_executable_path: 'yes'
+      - name: 'Check MacVim latest version'
+        if: "always() && steps.macvim_latest.conclusion == 'success'"
+        uses: './actions/check-version'
+        with:
+          expected_vim_version: '${{ steps.macvim_latest.outputs.actual_vim_version }}'
+          executable: '${{ steps.macvim_latest.outputs.executable }}'
+          executable_path: '${{ steps.macvim_latest.outputs.executable_path }}'
+          vim_type: 'MacVim'
+          use_executable_path: 'yes'
+
+
   show-limit-after:
     name: 'Show GitHub API rate limit after test'
-    needs: 'test'
+    needs: ['test', 'multiple-test']
     runs-on: 'ubuntu-latest'
     timeout-minutes: 1
     if: 'always()'

@@ -29,16 +29,16 @@ export abstract class BuildInstaller implements Installer {
     return true;
   }
 
-  repositoryPath(): string {
+  repositoryPath(vimVersion: string): string {
     if (!this._repositoryPath) {
       const repoName = this.repository.split("/").pop() || "vim";
-      this._repositoryPath = path.join(TEMP_PATH, "repos", repoName);
+      this._repositoryPath = path.join(TEMP_PATH, "repos", repoName, vimVersion);
     }
     return this._repositoryPath;
   }
 
-  async obtainFixedVersion(): Promise<string> {
-    return await execGit(["describe", "--tags", "--always"], {cwd: this.repositoryPath()});
+  async obtainFixedVersion(vimVersion: string): Promise<string> {
+    return await execGit(["describe", "--tags", "--always"], {cwd: this.repositoryPath(vimVersion)});
   }
 
   async resolveVersion(vimVersion: string): Promise<FixedVersion> {
@@ -47,10 +47,10 @@ export abstract class BuildInstaller implements Installer {
     }
 
     if (!isFixedVersion(vimVersion)) {
-      await gitClone(this.repository, vimVersion, this.repositoryPath(), 100);
-      vimVersion = await this.obtainFixedVersion();
+      await gitClone(this.repository, vimVersion, this.repositoryPath(vimVersion), 100);
+      vimVersion = await this.obtainFixedVersion(vimVersion);
       if (!isFixedVersion(vimVersion)) {
-        vimVersion = await execGit(["rev-parse", "HEAD"], {cwd: this.repositoryPath()});
+        vimVersion = await execGit(["rev-parse", "HEAD"], {cwd: this.repositoryPath(vimVersion)});
       }
     }
 
@@ -58,7 +58,7 @@ export abstract class BuildInstaller implements Installer {
   }
 
   async cloneVim(vimVersion: string, depth = 1): Promise<string> {
-    await gitClone(this.repository, vimVersion, this.repositoryPath(), depth);
-    return this.repositoryPath();
+    await gitClone(this.repository, vimVersion, this.repositoryPath(vimVersion), depth);
+    return this.repositoryPath(vimVersion);
   }
 }
