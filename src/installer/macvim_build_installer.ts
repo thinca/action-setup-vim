@@ -13,12 +13,12 @@ export class MacVimBuildInstaller extends BuildInstaller {
     return "vim";
   }
 
-  async obtainFixedVersion(): Promise<string> {
-    const log = await execGit(["log", "-1", "--format=format:%B"], {cwd: this.repositoryPath()});
+  async obtainFixedVersion(vimVersion: string): Promise<string> {
+    const log = await execGit(["log", "-1", "--format=format:%B"], {cwd: this.repositoryPath(vimVersion)});
     const matched = /Vim\s+patch\s+v?(\d+\.\d+\.\d+)/.exec(log);
     if (matched) {
       const version = `v${matched[1]}`;
-      const tag = await super.obtainFixedVersion();
+      const tag = await super.obtainFixedVersion(vimVersion);
       this.tags[version] = tag;
       return version;
     }
@@ -27,7 +27,7 @@ export class MacVimBuildInstaller extends BuildInstaller {
 
   async install(vimVersion: FixedVersion): Promise<void> {
     const tag = this.tags[vimVersion] || vimVersion;
-    const reposPath = this.repositoryPath();
+    const reposPath = this.repositoryPath(vimVersion);
     await gitClone("macvim-dev/macvim", tag, reposPath);
     const srcPath = path.join(reposPath, "src");
     await exec("./configure", [], {cwd: srcPath});

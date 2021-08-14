@@ -16,7 +16,7 @@ inputs:
     description: |-
       When this is `yes`, setups the GUI version.
       And `outputs.executable` points to GUI version of Vim.
-    required: true
+    required: false
   executable:
     description: |-
       The name of executable file.
@@ -25,6 +25,11 @@ inputs:
     description: |-
       The full path of executable file.
     required: true
+  use_executable_path:
+    description: |-
+      When this is `yes`, uses `executable_path` to execute Vim.
+      This is for multiple install tests.
+    required: false
 
 branding:
   icon: 'check'

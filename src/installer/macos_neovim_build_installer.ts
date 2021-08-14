@@ -5,7 +5,7 @@ import {NeovimBuildInstaller} from "./neovim_build_installer";
 
 export class MacosNeovimBuildInstaller extends NeovimBuildInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
-    const reposPath = this.repositoryPath();
+    const reposPath = this.repositoryPath(vimVersion);
     const packages = [
       "ninja", "libtool", "automake", "cmake", "pkg-config", "gettext",
     ];

@@ -5,7 +5,7 @@ import {NeovimBuildInstaller} from "./neovim_build_installer";
 
 export class WindowsNeovimBuildInstaller extends NeovimBuildInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
-    const reposPath = this.repositoryPath();
+    const reposPath = this.repositoryPath(vimVersion);
     await gitClone("neovim/neovim", vimVersion, reposPath);
     await exec(
       "powershell.exe",
