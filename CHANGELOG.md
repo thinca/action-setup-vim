@@ -4,6 +4,7 @@
 
 - Added: `executable_path` output.
 - Improved: Allow installs multiple different Vim at one environment.
+- Security: Update dependencies.
 
 
 ## v1.0.9 - 2021-08-01
