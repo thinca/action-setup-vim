@@ -132,9 +132,11 @@ async function check(): Promise<string> {
     throw new Error(`"executable_path" does not exist: ${executablePath}`);
   }
 
+  const vimFile = core.getInput("use_executable_path") === "yes" ? executablePath : executable;
+
   core.info(`Expected Version: ${expectedVimVersion}`);
 
-  const versionOutput = (await getVersionOutput(vimType, isGUI, executable)).trim();
+  const versionOutput = (await getVersionOutput(vimType, isGUI, vimFile)).trim();
 
   const actualVersion = extractVersionFromVersionOutput(versionOutput);
 

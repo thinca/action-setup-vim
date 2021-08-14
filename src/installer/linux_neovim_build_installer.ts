@@ -7,7 +7,7 @@ import {readFileSync} from "fs";
 
 export class LinuxNeovimBuildInstaller extends NeovimBuildInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
-    const reposPath = this.repositoryPath();
+    const reposPath = this.repositoryPath(vimVersion);
     await gitClone("neovim/neovim", vimVersion, reposPath);
 
     const packages = [
