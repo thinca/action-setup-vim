@@ -26,8 +26,8 @@
 
 ## v1.0.7 - 2020-11-18
 
-- Added: `install_path` outout.
-- Added: `cache_hit` outout.
+- Added: `install_path` output.
+- Added: `cache_hit` output.
 - Improved: Improve for old version of Neovim.
 - Fixed: Caching problem when multiple jobs run.
 - Security: Update dependencies.
