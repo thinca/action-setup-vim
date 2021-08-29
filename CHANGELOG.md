@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed: Building Vim on Linux with GUI.
 
 
 ## v1.1.0 - 2021-08-14
