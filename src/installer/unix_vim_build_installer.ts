@@ -8,6 +8,7 @@ export class UnixVimBuildInstaller extends VimBuildInstaller implements Installe
     const reposPath = await this.cloneVim(vimVersion);
     const args = [`--prefix=${this.installDir}`, "--with-features=huge"];
     if (this.isGUI) {
+      await exec("sudo", ["apt-get", "update"]);
       await exec("sudo", ["apt-get", "install", "libxmu-dev", "libgtk-3-dev", "libxpm-dev"]);
       args.push("--enable-gui=gtk3", "--enable-fail-if-missing");
     }
