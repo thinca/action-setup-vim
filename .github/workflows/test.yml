@@ -73,7 +73,7 @@ jobs:
             version: 'v8.1.0001'
           - vim_type: 'Neovim'
             vim_version: 'latest'
-            version: 'v0.4.4'
+            version: 'v0.5.1'
           - vim_type: 'MacVim'
             vim_version: 'latest'
             version: 'snapshot-162'  # v8.2.0319
