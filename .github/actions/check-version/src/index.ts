@@ -7,12 +7,14 @@ const execFile = promisify(cp.execFile);
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 
-const VERSION_OUTPUT_CMD = [
-  "redir! @a",
-  "version",
-  "0put a",
-  "wq!",
-].join(" | ");
+function versionOutputCmd(outFile: string): string {
+  return [
+    `redir! > ${outFile}`,
+    "version",
+    "redir END",
+    "qall!",
+  ].join(" | ");
+}
 
 function timeout<T>(promise: Promise<T>, timeoutMilliseconds: number): Promise<T> {
   const timeoutPromise = new Promise<T>(
@@ -83,7 +85,7 @@ async function getWindowsGUIVersionOutput(executable: string): Promise<string> {
   // gVim on Windows shows version info from "--version" via GUI dialog, so we use other approach.
   const bat = [
     `start /wait ${executable} -silent -register`,
-    `start /wait ${executable} -u NONE -c "${VERSION_OUTPUT_CMD}" version.txt`,
+    `start /wait ${executable} -u NONE -c "${versionOutputCmd("version.txt")}"`,
   ];
   await writeFile("version.bat", bat.join("\n"));
 
@@ -94,7 +96,7 @@ async function getWindowsGUIVersionOutput(executable: string): Promise<string> {
 
 async function getUnixGUIVersionOutput(executable: string): Promise<string> {
 
-  await timeout(execFile(executable, ["--cmd", VERSION_OUTPUT_CMD, "version.txt"]), 5000);
+  await timeout(execFile(executable, ["--cmd", versionOutputCmd("version.txt")]), 5000);
 
   return await readFile("version.txt", "utf8");
 }
