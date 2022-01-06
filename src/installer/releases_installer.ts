@@ -1,27 +1,19 @@
 import * as core from "@actions/core";
 import * as fs from "fs";
 import * as path from "path";
+import * as semver from "semver";
 import * as cache from "@actions/cache";
 import {downloadTool} from "@actions/tool-cache";
 import {Octokit, RestEndpointMethodTypes} from "@octokit/rest";
-import semverCoerce = require("semver/functions/coerce");
-import semverLte = require("semver/functions/lte");
-import {SemVer} from "semver";
 import {ActionError} from "../action_error";
 import {FixedVersion, Installer, InstallType} from "../interfaces";
 import {TEMP_PATH} from "../temp";
 
 export type Release = RestEndpointMethodTypes["repos"]["listReleases"]["response"]["data"][number];
 
-// semver disallow extra leading zero.
-// v8.2.0000 -> v8.2.0
-function adjustSemver(ver: string): string {
-  return ver.replace(/\.0*(\d)/g, ".$1");
-}
-
-export function toSemver(ver: string): SemVer | null {
+export function toSemver(ver: string): semver.SemVer | null {
   if (/^v?\d/.test(ver)) {
-    return semverCoerce(adjustSemver(ver));
+    return semver.coerce(ver, {loose: true});
   }
   return null;
 }
@@ -54,13 +46,13 @@ export abstract class ReleasesInstaller implements Installer {
     const [owner, repo] = this.repository.split("/");
     this.releases = await this.fetchReleases(owner, repo);
 
-    const release = await this.findRelease(vimVersion);
+    const release = this.findRelease(vimVersion);
     const actualVersion = await this.perpetuateVersion(owner, repo, release);
     this.releases[actualVersion] = release;
     return actualVersion as FixedVersion;
   }
 
-  private async findRelease(vimVersion: string): Promise<Release> {
+  private findRelease(vimVersion: string): Release {
     const isHead = vimVersion === "head";
     if (isHead) {
       return this.releases.head;
@@ -83,7 +75,7 @@ export abstract class ReleasesInstaller implements Installer {
         if (!releaseSemver) {
           continue;
         }
-        if (semverLte(vimSemVer, releaseSemver)) {
+        if (semver.lte(vimSemVer, releaseSemver)) {
           targetRelease = release;
         } else {
           break;

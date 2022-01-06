@@ -34,7 +34,7 @@ jobs:
           wget --method=GET \
           --quiet --content-on-error \
           --output-document=- \
-          --header 'Authorization: Bearer ${{ secrets.PERSONAL_GITHUB_TOKEN }}' \
+          --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
           --header 'Content-Type: application/json' \
           'https://api.github.com/rate_limit'
 
@@ -139,7 +139,6 @@ jobs:
           gui: '${{ matrix.gui }}'
           download: '${{ matrix.download }}'
           cache: 'test'
-          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
       - name: 'Check Vim version'
         uses: './actions/check-version'
         with:
@@ -161,7 +160,6 @@ jobs:
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
           download: '${{ matrix.download }}'
-          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
       - name: 'Check Setup Vim is done with cache'
         if: "matrix.download == 'never'"
         run: |
@@ -206,28 +204,24 @@ jobs:
         with:
           vim_version: 'head'
           vim_type: 'Vim'
-          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
       - name: 'Setup Vim latest'
         id: 'vim_latest'
         uses: './actions/setup-vim'
         with:
           vim_version: 'v8.2.0000'
           vim_type: 'Vim'
-          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
       - name: 'Setup Neovim head'
         id: 'neovim_head'
         uses: './actions/setup-vim'
         with:
           vim_version: 'head'
           vim_type: 'Neovim'
-          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
       - name: 'Setup Neovim latest'
         id: 'neovim_latest'
         uses: './actions/setup-vim'
         with:
           vim_version: 'v0.5.0'
           vim_type: 'Neovim'
-          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
       - name: 'Setup MacVim head'
         if: "matrix.platform == 'MacOS'"
         id: 'macvim_head'
@@ -235,7 +229,6 @@ jobs:
         with:
           vim_version: 'head'
           vim_type: 'MacVim'
-          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
       - name: 'Setup MacVim latest'
         if: "matrix.platform == 'MacOS'"
         id: 'macvim_latest'
@@ -243,7 +236,6 @@ jobs:
         with:
           vim_version: 'snapshot-162'
           vim_type: 'MacVim'
-          github_token: '${{ secrets.PERSONAL_GITHUB_TOKEN }}'
 
       - name: 'Check Vim head version'
         if: "always() && steps.vim_head.conclusion == 'success'"
@@ -313,6 +305,6 @@ jobs:
           wget --method=GET \
           --quiet --content-on-error \
           --output-document=- \
-          --header 'Authorization: Bearer ${{ secrets.PERSONAL_GITHUB_TOKEN }}' \
+          --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
           --header 'Content-Type: application/json' \
           'https://api.github.com/rate_limit'
