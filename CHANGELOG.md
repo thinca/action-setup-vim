@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed: Building Vim on Linux with GUI.
+- Fixed: Building MacVim.
 
 
 ## v1.1.0 - 2021-08-14
