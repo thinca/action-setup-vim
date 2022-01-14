@@ -42,14 +42,6 @@ async function main(): Promise<void> {
   let cacheHit: string | undefined;
 
   if (!installed) {
-    if (process.platform === "darwin") {
-      // Workaround:
-      // Building Vim before v8.2.1119 on MacOS will fail because default Xcode was chaged to 12.
-      // https://github.com/actions/virtual-environments/commit/c09dca28df69d9aaaeac5635257d23722810d307#diff-7a1606bd717fc0cf55f9419157117d9ca306f91bd2fdfc294720687d7be1b2c7R220
-      // We change using version of Xcode to 11 to build old Vim.
-      process.env["DEVELOPER_DIR"] = "/Applications/Xcode_11.7.app/Contents/Developer";
-    }
-
     await io.mkdirP(installPath);
 
     const cacheInput = core.getInput("cache");

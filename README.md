@@ -111,7 +111,7 @@ See [neovim/neovim#11412](https://github.com/neovim/neovim/pull/11412) for the d
 
 MacVim has a GUI version, but it is not supported yet because it is too difficult treating on CI.
 
-Building snapshot-157 and before versions will be failre.
+Building snapshot-157 and before versions will be failure.
 See [macvim-dev/macvim#946](https://github.com/macvim-dev/macvim/issues/946) for the detail.
 
 

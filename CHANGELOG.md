@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Unreleased
+
+- Fixed: Building Vim on Linux with GUI.
+- Fixed: Building MacVim.
+
+
 ## v1.1.0 - 2021-08-14
 
 - Added: `executable_path` output.
@@ -22,8 +28,8 @@
 
 ## v1.0.7 - 2020-11-18
 
-- Added: `install_path` outout.
-- Added: `cache_hit` outout.
+- Added: `install_path` output.
+- Added: `cache_hit` output.
 - Improved: Improve for old version of Neovim.
 - Fixed: Caching problem when multiple jobs run.
 - Security: Update dependencies.
