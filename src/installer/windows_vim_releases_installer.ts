@@ -9,6 +9,7 @@ import {TEMP_PATH} from "../temp";
 export class WindowsVimReleasesInstaller extends SemverReleasesInstaller {
   readonly repository: string = "vim/vim-win32-installer";
   readonly assetNamePatterns: RegExp[] = [/^gvim_.*_x64(?:_signed)?\.zip$/];
+  readonly availableVersion: string = "v8.0.0";
 
   getExecutableName(): string {
     return this.isGUI ? "gvim" : "vim";

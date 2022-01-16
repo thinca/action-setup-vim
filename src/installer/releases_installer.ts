@@ -4,12 +4,76 @@ import * as path from "path";
 import * as semver from "semver";
 import * as cache from "@actions/cache";
 import {downloadTool} from "@actions/tool-cache";
-import {Octokit, RestEndpointMethodTypes} from "@octokit/rest";
+import {graphql} from "@octokit/graphql";
+import {RequestParameters} from "@octokit/graphql/dist-types/types";
 import {ActionError} from "../action_error";
 import {FixedVersion, Installer, InstallType} from "../interfaces";
 import {TEMP_PATH} from "../temp";
 
-export type Release = RestEndpointMethodTypes["repos"]["listReleases"]["response"]["data"][number];
+const RELEASES_QUERY = `
+query($owner: String!, $repo: String!, $cursor: String) {
+  repository(owner: $owner, name: $repo) {
+    releases(first: 100, orderBy: {direction: DESC, field: CREATED_AT}, after: $cursor) {
+      edges {
+        node {
+          description
+          isLatest
+          releaseAssets(first: 10) {
+            edges {
+              node {
+                name
+                downloadUrl
+              }
+            }
+          }
+          tagCommit {
+            oid
+          }
+          tagName
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+}`;
+
+export type Release = {
+  description: string;
+  isLatest: boolean;
+  releaseAssets: {
+    edges: {
+      node: {
+        name: string;
+        downloadUrl: string;
+      };
+    }[];
+  };
+  tagCommit: {
+    oid: string;
+  };
+  tagName: string;
+}
+
+type Response = {
+  repository: {
+    releases: {
+      pageInfo: {
+        hasNextPage: boolean;
+        endCursor: string;
+      }
+      edges: {
+        node: Release;
+      }[];
+    };
+  };
+}
+
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer U> ? Array<DeepPartial<U>> : DeepPartial<T[P]>;
+}
 
 export function toSemver(ver: string): semver.SemVer | null {
   if (/^v?\d/.test(ver)) {
@@ -26,12 +90,13 @@ export abstract class ReleasesInstaller implements Installer {
   abstract install(vimVersion: FixedVersion): Promise<void>;
   abstract getPath(vimVersion: FixedVersion): string;
 
+  readonly availableVersion: string = "";
   readonly installType = InstallType.download;
   readonly installDir: string;
   readonly isGUI: boolean;
 
-  private _octokit?: Octokit;
-  private releases: { [key: string]: Release } = {};
+  private release?: Release;
+  private releases: Release[] = [];
 
   constructor(installDir: string, isGUI: boolean) {
     this.installDir = installDir;
@@ -43,87 +108,70 @@ export abstract class ReleasesInstaller implements Installer {
   }
 
   async resolveVersion(vimVersion: string): Promise<FixedVersion> {
-    const [owner, repo] = this.repository.split("/");
-    this.releases = await this.fetchReleases(owner, repo);
-
-    const release = this.findRelease(vimVersion);
-    const actualVersion = await this.perpetuateVersion(owner, repo, release);
-    this.releases[actualVersion] = release;
+    this.releases = await this.fetchReleases();
+    this.release = this.findRelease(vimVersion);
+    const actualVersion = this.perpetuateVersion();
     return actualVersion as FixedVersion;
   }
 
-  private findRelease(vimVersion: string): Release {
-    const isHead = vimVersion === "head";
-    if (isHead) {
-      return this.releases.head;
-    }
-
-    const isLatest = vimVersion === "latest";
-    if (isLatest) {
-      return Object
-        .values(this.releases)
-        .filter((release) => !release.draft && !release.prerelease)
-        .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
-    }
-
-    const vimSemVer = toSemver(vimVersion);
-    if (vimSemVer) {
-      let targetRelease: Release | undefined = undefined;
-      for (const release of Object.values(this.releases).sort((a, b) => b.created_at.localeCompare(a.created_at))) {
-        const releaseVersion = this.toSemverString(release);
-        const releaseSemver = toSemver(releaseVersion);
-        if (!releaseSemver) {
-          continue;
-        }
-        if (semver.lte(vimSemVer, releaseSemver)) {
-          targetRelease = release;
-        } else {
-          break;
-        }
-      }
-      if (!targetRelease) {
-        throw new ActionError("Target release not found");
-      }
-      return targetRelease;
-    } else {
-      return this.releases[vimVersion];
-    }
-  }
-
-  private async fetchReleases(
-    owner: string,
-    repo: string,
-  ): Promise<{ [key: string]: Release }> {
-    let releases: { [key: string]: Release } = {};
+  private async fetchReleases(): Promise<Release[]> {
+    let releases: Release[] = [];
 
     const cachePath = path.join(TEMP_PATH, `release-cache-${this.repository.replace(/^.+\//, "")}.json`);
     const restoreKey = `releases--${this.repository}--`;
     const cacheExists = await cache.restoreCache([cachePath], restoreKey, [restoreKey]);
     if (cacheExists) {
-      releases = JSON.parse(fs.readFileSync(cachePath, {encoding: "utf8"})) as {string: Release};
+      releases = JSON.parse(fs.readFileSync(cachePath, {encoding: "utf8"})) as Release[];
     }
 
-    let updated = false;
-    const octokit = this.octokit();
+    const [owner, repo] = this.repository.split("/");
+    const parameters: RequestParameters = {
+      owner: owner,
+      repo: repo,
+      headers: {
+        authorization: `bearer ${core.getInput("github_token")}`,
+      },
+    };
+    const newReleases: Release[] = [];
+    const availableVersion = toSemver(this.availableVersion) ?? this.availableVersion;
+
     fetching:
-    for await (const {data: resReleases} of octokit.paginate.iterator(octokit.repos.listReleases, {owner, repo})) {
+    for (;;) {
+      const {repository}: DeepPartial<Response> = await graphql(RELEASES_QUERY, parameters);
+      const resReleases = (repository?.releases?.edges?.map(node => node.node) || []) as Release[];
       for (const release of resReleases) {
-        if (release.assets.length === 0) {
+        if (release.releaseAssets.edges.length === 0) {
           continue;
         }
-        if (releases[release.tag_name]) {
-          break fetching;
-        } else {
-          releases[release.tag_name] = release;
-          if (!updated) {
-            releases.head = release;
-            updated = true;
+        if (releases[0]?.tagName === release.tagName) {
+          if (releases[0]?.tagCommit.oid === release.tagCommit?.oid) {
+            break fetching;
+          }
+          // if A.tagCommit.oid != B.tagCommit.oid thouth A.tagName == B.tagName,
+          // presume that the tag commit was updated and so remove the old release.
+          // e.g. "nightly" and "stable" tags
+          releases.shift();
+        }
+        newReleases.push(release);
+        if (availableVersion) {
+          if (availableVersion instanceof semver.SemVer) {
+            if ((toSemver(release.tagName)?.compare(availableVersion) ?? 0) < 0) {
+              break fetching;
+            }
+          } else if (release.tagName === availableVersion) {
+            break fetching;
           }
         }
       }
+      const pageInfo = repository?.releases?.pageInfo;
+      if (!pageInfo?.hasNextPage) {
+        break;
+      }
+      parameters.cursor = pageInfo?.endCursor;
     }
 
-    if (updated) {
+    if (newReleases.length > 0) {
+      releases = newReleases.concat(releases);
       fs.writeFileSync(cachePath, JSON.stringify(releases));
       try {
         await cache.saveCache([cachePath], `releases--${this.repository}--${Object.keys(releases).length}`);
@@ -139,35 +187,52 @@ export abstract class ReleasesInstaller implements Installer {
     return releases;
   }
 
-  private async perpetuateVersion(
-    owner: string,
-    repo: string,
-    release: Release,
-  ): Promise<string> {
+  private findRelease(vimVersion: string): Release | undefined {
+    const isHead = vimVersion === "head";
+    if (isHead) {
+      return this.releases[0];
+    }
+
+    const isLatest = vimVersion === "latest";
+    if (isLatest) {
+      return this.releases.find(release => release.isLatest);
+    }
+
+    const vimSemVer = toSemver(vimVersion);
+    if (!vimSemVer) {
+      return this.releases.find(release => release.tagName === vimVersion);
+    }
+
+    const releases = this.releases.filter((release) => {
+      const releaseVersion = this.toSemverString(release);
+      const releaseSemver = toSemver(releaseVersion);
+      return releaseSemver && semver.lte(vimSemVer, releaseSemver);
+    });
+    return releases.pop();
+  }
+
+  private perpetuateVersion(): string {
+    const release = this.release;
+    if (!release) {
+      throw new ActionError("Target release not found");
+    }
+
     const version = this.toSemverString(release);
     if (toSemver(version)) {
       return version;
     }
 
     // We assume not a semver tag is a symbolized tag (e.g. "stable", "nightly")
-    const octokit = this.octokit();
-    const {data: res} = await octokit.git.getRef({owner, repo, ref: `tags/${release.tag_name}`});
-    const targetSha = res.object.sha;
+    const targetSha = release.tagCommit.oid;
 
     // It may be released as numbered version.
     // Only check the first page
-    const {data: releases} = await octokit.repos.listReleases({owner, repo});
-    for (const release of releases) {
-      const {tag_name: tagName} = release;
+    for (const release of this.releases.slice(0, 10)) {
+      const {tagName} = release;
       if (!toSemver(tagName)) {
         continue;
       }
-      const {data: refRes} = await octokit.git.getRef({owner, repo, ref: `tags/${tagName}`});
-      let sha = refRes.object.sha;
-      if (refRes.object.type === "tag") {
-        const {data: tagRes} = await octokit.git.getTag({owner, repo, tag_sha: sha});
-        sha = tagRes.object.sha;
-      }
+      const sha = release.tagCommit.oid;
       if (sha === targetSha) {
         return tagName;
       }
@@ -177,24 +242,18 @@ export abstract class ReleasesInstaller implements Installer {
   }
 
   async downloadAsset(vimVersion: FixedVersion): Promise<string> {
-    const release = this.releases[vimVersion];
+    const release = this.release;
     if (!release) {
       throw new ActionError(`Unknown version: ${vimVersion}`);
     }
-    const asset = this.assetNamePatterns.map(pattern => release.assets.find(asset => pattern.test(asset.name))).find(v => v);
+    const releaseAssets = release.releaseAssets.edges.map(node => node.node);
+    const asset = this.assetNamePatterns.map(pattern => releaseAssets.find(asset => pattern.test(asset.name))).find(v => v);
     if (!asset) {
-      const assetNames = release.assets.map(asset => asset.name);
+      const assetNames = releaseAssets.map(asset => asset.name);
       throw new ActionError(`Target asset not found: /${this.assetNamePatterns.map(p => p.source).join("|")}/ in ${JSON.stringify(assetNames)}`);
     }
-    const url = asset.browser_download_url;
+    const url = asset.downloadUrl;
     const dest = path.join(TEMP_PATH, this.repository, vimVersion, asset.name);
     return await downloadTool(url, dest);
-  }
-
-  private octokit(): Octokit {
-    if (!this._octokit) {
-      this._octokit = new Octokit({auth: core.getInput("github_token")});
-    }
-    return this._octokit;
   }
 }

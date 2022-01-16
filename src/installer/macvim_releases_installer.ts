@@ -9,7 +9,7 @@ function checkPath(targetPath: string): boolean {
   try {
     const stat = fs.statSync(targetPath);
     return stat.isFile() || stat.isDirectory();
-  } catch (e) {
+  } catch (_e) {
     return false;
   }
 }
@@ -17,10 +17,10 @@ function checkPath(targetPath: string): boolean {
 export class MacVimReleasesInstaller extends ReleasesInstaller {
   readonly repository: string = "macvim-dev/macvim";
   readonly assetNamePatterns: RegExp[] = [/^MacVim.*\.dmg$/];
-  readonly vimVersionPattern: RegExp = /(Vim\s+patch|Updated\s+to\s+Vim)\s*(\d+\.\d+\.\d+)/i;
+  readonly vimVersionPattern: RegExp = /(?:Vim\s+patch|Updated\s+to\s+Vim)\s*(\d+\.\d+\.\d+)/i;
 
   toSemverString(release: Release): string {
-    const matched = this.vimVersionPattern.exec(release.body ?? "");
+    const matched = this.vimVersionPattern.exec(release.description ?? "");
     return matched?.[1] || "";
   }
 
