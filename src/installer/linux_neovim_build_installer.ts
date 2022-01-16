@@ -41,7 +41,7 @@ export class LinuxNeovimBuildInstaller extends NeovimBuildInstaller {
     try {
       const content = readFileSync(filepath, {encoding: "utf8"});
       return 0 <= content.indexOf(target);
-    } catch (e) {
+    } catch (_e) {
       return false;
     }
   }
