@@ -16,27 +16,36 @@ jobs:
         run: |
           npm ci
           npm run --silent build -- --mode=production
-          mkdir -p ${GITHUB_WORKSPACE}/actions/setup-vim
-          cp action.js action.yml ${GITHUB_WORKSPACE}/actions/setup-vim
+          mkdir -p ${{ github.workspace }}/actions/setup-vim
+          cp action.js action.yml ${{ github.workspace }}/actions/setup-vim
 
-          cd ${GITHUB_WORKSPACE}/.github/actions/check-version
+          cd ${{ github.workspace }}/.github/actions/check-version
           npm ci
           npm run --silent build
-          mkdir -p ${GITHUB_WORKSPACE}/actions/check-version
-          cp action.js action.yml ${GITHUB_WORKSPACE}/actions/check-version
+          mkdir -p ${{ github.workspace }}/actions/check-version
+          cp action.js action.yml ${{ github.workspace }}/actions/check-version
       - name: 'Upload actions as artifact'
         uses: 'actions/upload-artifact@v2'
         with:
           name: 'actions'
           path: 'actions'
-      - name: 'Show GitHub API rate limit'
-        run: |
-          wget --method=GET \
-          --quiet --content-on-error \
-          --output-document=- \
-          --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
-          --header 'Content-Type: application/json' \
-          'https://api.github.com/rate_limit'
+      - name: 'Get GitHub GraphQL API rate limit'
+        id: rate_limit
+        uses: octokit/graphql-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          query: |
+            query {
+              rateLimit {
+                limit
+                cost
+                remaining
+                resetAt
+              }
+            }
+      - name: 'Show GitHub GraphQL API rate limit'
+        run: echo "${{ steps.rate_limit.outputs.data }}"
 
   test:
     name: '${{ matrix.gui_cui }}/${{ matrix.dl_bd }}: ${{ matrix.vim_type }} ${{ matrix.vim_version }} on ${{ matrix.platform }}'
@@ -300,11 +309,20 @@ jobs:
     timeout-minutes: 1
     if: 'always()'
     steps:
-      - name: 'Show GitHub API rate limit'
-        run: |
-          wget --method=GET \
-          --quiet --content-on-error \
-          --output-document=- \
-          --header 'Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
-          --header 'Content-Type: application/json' \
-          'https://api.github.com/rate_limit'
+      - name: 'Get GitHub GraphQL API rate limit'
+        id: rate_limit
+        uses: octokit/graphql-action@v2.x
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          query: |
+            query {
+              rateLimit {
+                limit
+                cost
+                remaining
+                resetAt
+              }
+            }
+      - name: 'Show GitHub GraphQL API rate limit'
+        run: echo "${{ steps.rate_limit.outputs.data }}"
