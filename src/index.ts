@@ -35,7 +35,7 @@ async function main(): Promise<void> {
   try {
     const stat = fs.statSync(installPath);
     installed = stat.isDirectory();
-  } catch (e) {
+  } catch (_e) {
     // path not exist
   }
 
