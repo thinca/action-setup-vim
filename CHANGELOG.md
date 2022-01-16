@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Improved: Reduce consuming API rate limit.  (Thanks @ichizok)
+- Fixed: Cannot update the cache of GitHub Releases.  (Thanks @ichizok)
 
 
 ## v1.1.1 - 2022-01-14
