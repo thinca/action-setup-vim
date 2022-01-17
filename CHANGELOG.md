@@ -2,15 +2,15 @@
 
 ## Unreleased
 
-- Improved: Reduce consuming API rate limit.  (Thanks [@ichizok](https://github.com/ichizok))
-- Fixed: Cannot update the cache of GitHub Releases.  (Thanks [@ichizok](https://github.com/ichizok))
+- Improved: Reduce consuming API rate limit.  (Thanks [@ichizok](https://github.com/ichizok) [#6](https://github.com/thinca/action-setup-vim/pull/6))
+- Fixed: Cannot update the cache of GitHub Releases.  (Thanks [@ichizok](https://github.com/ichizok) [#6](https://github.com/thinca/action-setup-vim/pull/6))
 - Security: Update dependencies.
 
 
 ## v1.1.1 - 2022-01-14
 
 - Fixed: Building Vim on Linux with GUI.
-- Fixed: Building MacVim.  (Thanks [@ichizok](https://github.com/ichizok))
+- Fixed: Building MacVim.  (Thanks [@ichizok](https://github.com/ichizok) [#5](https://github.com/thinca/action-setup-vim/pull/5))
 
 
 ## v1.1.0 - 2021-08-14
