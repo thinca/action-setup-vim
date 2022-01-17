@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v1.1.2 - 2022-01-17
 
 - Improved: Reduce consuming API rate limit.  (Thanks [@ichizok](https://github.com/ichizok) [#6](https://github.com/thinca/action-setup-vim/pull/6))
 - Fixed: Cannot update the cache of GitHub Releases.  (Thanks [@ichizok](https://github.com/ichizok) [#6](https://github.com/thinca/action-setup-vim/pull/6))
