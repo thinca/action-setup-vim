@@ -35,8 +35,8 @@ export class MacVimBuildInstaller extends BuildInstaller {
     await gitClone("macvim-dev/macvim", tag, reposPath);
     await backportPatch(reposPath, vimVersion);
 
-    // To avoid `sed: RE error: illegal byte sequence` error, should set 'LC_CTYPE=C'.
-    process.env.LC_CTYPE = "C";
+    // To avoid `sed: RE error: illegal byte sequence` error, should set 'LC_ALL=C'.
+    process.env.LC_ALL = "C";
 
     const args: string[] = [];
     if (semver.lte(vimVersion, "8.2.2127", true)) {
