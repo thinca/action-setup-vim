@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as core from "@actions/core";
 import {extractZip} from "@actions/tool-cache";
 import {SemverReleasesInstaller} from "./semver_releases_installer";
 import {ActionError} from "../action_error";
@@ -8,7 +9,8 @@ import {TEMP_PATH} from "../temp";
 
 export class WindowsVimReleasesInstaller extends SemverReleasesInstaller {
   readonly repository: string = "vim/vim-win32-installer";
-  readonly assetNamePatterns: RegExp[] = [/^gvim_.*_x64(?:_signed)?\.zip$/];
+  readonly arch = core.getInput("arch").includes("64") ? "x64" : "x86";
+  readonly assetNamePatterns: RegExp[] = [RegExp(String.raw`^gvim_.*_${this.arch}(?:_signed)?\.zip$`)];
   readonly availableVersion: string = "v8.0.0";
 
   getExecutableName(): string {
