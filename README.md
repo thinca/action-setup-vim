@@ -153,6 +153,14 @@ And `outputs.executable` points to GUI version of Vim.
 default: `no`
 
 
+#### `arch`
+
+Architecture of Vim.
+This is either of `x86_64` or `x86`, enable when `vim_type` is `vim` on Windows.
+
+default: `x86_64`
+
+
 #### `download`
 
 When this is `always`, downloads the officially released binary, or fail if unavailable.
