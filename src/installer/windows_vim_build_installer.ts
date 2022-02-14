@@ -11,8 +11,10 @@ export class WindowsVimBuildInstaller extends VimBuildInstaller {
     const srcPath = path.join(reposPath, "src");
     const batPath = path.join(srcPath, "install.bat");
     const guiOptions = this.isGUI ? "GUI=yes OLE=yes DIRECTX=yes" : "GUI=no OLE=no DIRECTX=no";
+    const vsPath = await this.getVSPath();
+
     fs.writeFileSync(batPath, `
-    call "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
+    call "${path.join(vsPath, "VC\\Auxiliary\\Build\\vcvarsall.bat")}" x64
 
     rem Suppress progress animation
     sed -e "s/@<<$/@<< | sed -e 's#.*\\\\r.*##'/" Make_mvc.mak > Make_mvc2.mak
@@ -35,5 +37,16 @@ export class WindowsVimBuildInstaller extends VimBuildInstaller {
     const matched = /^v(\d+)\.(\d+)/.exec(vimVersion);
     const vimDir = matched ? `vim${matched[1]}${matched[2]}` : "runtime";
     return path.join(this.installDir, vimDir);
+  }
+
+  async getVSPath(): Promise<string> {
+    let vspath = "";
+    const options = {
+      listeners: {
+        stdout: (data: Buffer) => { vspath += data.toString(); }
+      }
+    };
+    await exec("vswhere", ["-products", "*", "-latest", "-property", "installationPath"], options);
+    return vspath.trim();
   }
 }
