@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v1.2.0 - 2022-02-15
 
 - Improved: Add `arch` argument MS-Windows.  (Thanks [@ichizok](https://github.com/ichizok) [#9](https://github.com/thinca/action-setup-vim/pull/9))
 - Improved: Use the correct path of Visual Studio is MS-Windows.  (Thanks [@ichizok](https://github.com/ichizok) [#8](https://github.com/thinca/action-setup-vim/pull/8))
