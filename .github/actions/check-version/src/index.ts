@@ -147,6 +147,14 @@ async function check(): Promise<string> {
   core.info(versionOutput);
   core.info("-------");
 
+  if (process.platform === "win32" && vimType === "vim") {
+    const actualArch = /(32|64)-bit/.exec(versionOutput)?.[0];
+    const expectedArch = core.getInput("arch").includes("64") ? "64-bit" : "32-bit";
+    if (expectedArch !== actualArch) {
+      throw Error(`Installed Vim's architecture is wrong:\nexpected: ${expectedArch}\nactual: ${actualArch}`);
+    }
+  }
+
   const normalizedExpectedVersion = normalizeVersion(expectedVimVersion);
 
   if (actualVersion === "nightly") {

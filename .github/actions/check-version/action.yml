@@ -17,6 +17,12 @@ inputs:
       When this is `yes`, setups the GUI version.
       And `outputs.executable` points to GUI version of Vim.
     required: false
+  arch:
+    description: |-
+      Architecture of Vim.
+      This is either of `x86_64` or `x86`, enable when `vim_type` is `vim` on Windows.
+    required: false
+    default: 'x86_64'
   executable:
     description: |-
       The name of executable file.

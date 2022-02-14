@@ -1,5 +1,9 @@
 name: 'Test'
-on: ['push', 'pull_request']
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * SAT'
 
 jobs:
   setup-actions:
@@ -56,6 +60,7 @@ jobs:
         platform: ['Linux', 'MacOS', 'Windows']
         gui_cui: ['GUI', 'CUI']
         dl_bd: ['DL', 'AT', 'BD']
+        arch: ['x86_64', 'x86']
 
         include:
           - platform: 'Linux'
@@ -124,6 +129,24 @@ jobs:
             platform: 'Linux'
           - vim_type: 'MacVim'
             platform: 'Windows'
+          # arch=x86 is only for Windows GUI head
+          - vim_type: 'Neovim'
+            arch: 'x86'
+          - vim_type: 'MacVim'
+            arch: 'x86'
+          - vim_version: 'latest'
+            arch: 'x86'
+          - vim_version: 'stable'
+            arch: 'x86'
+          - platform: 'Linux'
+            arch: 'x86'
+          - platform: 'MacOS'
+            arch: 'x86'
+          - gui_cui: 'CUI'
+            arch: 'x86'
+          - dl_bd: 'AT'
+            arch: 'x86'
+
       fail-fast: false
 
     needs: 'setup-actions'
@@ -146,6 +169,7 @@ jobs:
           vim_version: '${{ matrix.version || matrix.vim_version }}'
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
+          arch: '${{ matrix.arch }}'
           download: '${{ matrix.download }}'
           cache: 'test'
       - name: 'Check Vim version'
@@ -156,6 +180,7 @@ jobs:
           executable_path: '${{ steps.vim.outputs.executable_path }}'
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
+          arch: '${{ matrix.arch }}'
       - name: 'Delete installed Vim to reinstall'
         if: "matrix.download == 'never'"
         run: |

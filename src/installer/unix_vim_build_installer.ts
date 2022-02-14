@@ -10,8 +10,8 @@ export class UnixVimBuildInstaller extends VimBuildInstaller implements Installe
     await backportPatch(reposPath, vimVersion);
 
     if (process.platform === "darwin") {
-      // To avoid `sed: RE error: illegal byte sequence` error, should set 'LC_CTYPE=C'.
-      process.env.LC_CTYPE = "C";
+      // To avoid `sed: RE error: illegal byte sequence` error, should set 'LC_ALL=C'.
+      process.env.LC_ALL = "C";
     }
 
     const args = [`--prefix=${this.installDir}`, "--with-features=huge"];
