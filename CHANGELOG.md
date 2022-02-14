@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Improved: Add `arch` argument MS-Windows.  (Thanks [@ichizok](https://github.com/ichizok) [#9](https://github.com/thinca/action-setup-vim/pull/9))
+- Improved: Use the correct path of Visual Studio is MS-Windows.  (Thanks [@ichizok](https://github.com/ichizok) [#8](https://github.com/thinca/action-setup-vim/pull/8))
+- Fixed: Wrong using of `LC_TYPE` in MacOS.  (Thanks [@ichizok](https://github.com/ichizok) [#7](https://github.com/thinca/action-setup-vim/pull/7))
 
 
 ## v1.1.2 - 2022-01-17
