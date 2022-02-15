@@ -77,7 +77,7 @@ function extractVersionFromVersionOutput(verstionText: string): string {
 }
 
 async function getCUIVersionOutput(executable: string): Promise<string> {
-  const {stdout} = await timeout(execFile(executable, ["--version"]), 3000);
+  const {stdout} = await timeout(execFile(executable, ["--version"]), 10000);
   return stdout;
 }
 
@@ -89,14 +89,14 @@ async function getWindowsGUIVersionOutput(executable: string): Promise<string> {
   ];
   await writeFile("version.bat", bat.join("\n"));
 
-  await timeout(execFile("call", ["version.bat"], {shell: true}), 5000);
+  await timeout(execFile("call", ["version.bat"], {shell: true}), 10000);
 
   return await readFile("version.txt", "utf8");
 }
 
 async function getUnixGUIVersionOutput(executable: string): Promise<string> {
 
-  await timeout(execFile(executable, ["--cmd", versionOutputCmd("version.txt")]), 5000);
+  await timeout(execFile(executable, ["--cmd", versionOutputCmd("version.txt")]), 10000);
 
   return await readFile("version.txt", "utf8");
 }
