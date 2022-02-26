@@ -76,7 +76,7 @@ function extractVersionFromVersionOutput(verstionText: string): string {
   return "";
 }
 
-const COMMAND_TIMEOUT = 10 * 1000;
+const COMMAND_TIMEOUT = 20 * 1000;
 
 async function getCUIVersionOutput(executable: string): Promise<string> {
   const {stdout} = await timeout(execFile(executable, ["--version"]), COMMAND_TIMEOUT);
