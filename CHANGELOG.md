@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed: Fetching the head binary of Neovim.
+- Security: Update dependencies.
 
 
 ## v1.2.0 - 2022-02-15
