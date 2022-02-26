@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+
+
 ## v1.2.1 - 2022-02-27
 
 - Fixed: Fetching the head binary of Neovim.
