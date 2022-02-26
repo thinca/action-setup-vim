@@ -12,7 +12,6 @@ function versionOutputCmd(outFile: string): string {
     `redir! > ${outFile}`,
     "version",
     "redir END",
-    "qall!",
   ].join(" | ");
 }
 
@@ -25,6 +24,18 @@ function timeout<T>(promise: Promise<T>, timeoutMilliseconds: number): Promise<T
       )
   );
   return Promise.race([promise, timeoutPromise]);
+}
+
+async function retry<T>(promiseMaker: () => Promise<T>, tryCount: number): Promise<T> {
+  let rejected: any;
+  while (0 < tryCount--) {
+    try {
+      return await promiseMaker();
+    } catch (e) {
+      rejected = e;
+    }
+  }
+  return Promise.reject(rejected);
 }
 
 // v8.2.0012 -> 8.2.12
@@ -76,8 +87,11 @@ function extractVersionFromVersionOutput(verstionText: string): string {
   return "";
 }
 
+const COMMAND_TIMEOUT = 5 * 1000;
+const RETRY_COUNT = 3;
+
 async function getCUIVersionOutput(executable: string): Promise<string> {
-  const {stdout} = await timeout(execFile(executable, ["--version"]), 3000);
+  const {stdout} = await retry(() => timeout(execFile(executable, ["--version"]), COMMAND_TIMEOUT), RETRY_COUNT);
   return stdout;
 }
 
@@ -85,18 +99,18 @@ async function getWindowsGUIVersionOutput(executable: string): Promise<string> {
   // gVim on Windows shows version info from "--version" via GUI dialog, so we use other approach.
   const bat = [
     `start /wait ${executable} -silent -register`,
-    `start /wait ${executable} -u NONE -c "${versionOutputCmd("version.txt")}"`,
+    `start /wait ${executable} -u NONE -c "${versionOutputCmd("version.txt")}" -c "qall!"`,
   ];
   await writeFile("version.bat", bat.join("\n"));
 
-  await timeout(execFile("call", ["version.bat"], {shell: true}), 5000);
+  await retry(() => timeout(execFile("call", ["version.bat"], {shell: true}), COMMAND_TIMEOUT), RETRY_COUNT);
 
   return await readFile("version.txt", "utf8");
 }
 
 async function getUnixGUIVersionOutput(executable: string): Promise<string> {
 
-  await timeout(execFile(executable, ["--cmd", versionOutputCmd("version.txt")]), 5000);
+  await retry(() => timeout(execFile(executable, ["--cmd", versionOutputCmd("version.txt"), "--cmd", "qall!"]), COMMAND_TIMEOUT), RETRY_COUNT);
 
   return await readFile("version.txt", "utf8");
 }

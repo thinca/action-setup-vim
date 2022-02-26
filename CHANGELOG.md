@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Unreleased
+
+- Fixed: Fetching the head binary of Neovim.
+- Security: Update dependencies.
+
+
 ## v1.2.0 - 2022-02-15
 
 - Improved: Add `arch` argument MS-Windows.  (Thanks [@ichizok](https://github.com/ichizok) [#9](https://github.com/thinca/action-setup-vim/pull/9))
