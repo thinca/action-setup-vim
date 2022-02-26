@@ -88,7 +88,7 @@ function extractVersionFromVersionOutput(verstionText: string): string {
   return "";
 }
 
-const COMMAND_TIMEOUT = 20 * 1000;
+const COMMAND_TIMEOUT = 5 * 1000;
 const RETRY_COUNT = 3;
 
 async function getCUIVersionOutput(executable: string): Promise<string> {
