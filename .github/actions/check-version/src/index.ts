@@ -12,7 +12,6 @@ function versionOutputCmd(outFile: string): string {
     `redir! > ${outFile}`,
     "version",
     "redir END",
-    "qall!",
   ].join(" | ");
 }
 
@@ -100,7 +99,7 @@ async function getWindowsGUIVersionOutput(executable: string): Promise<string> {
   // gVim on Windows shows version info from "--version" via GUI dialog, so we use other approach.
   const bat = [
     `start /wait ${executable} -silent -register`,
-    `start /wait ${executable} -u NONE -c "${versionOutputCmd("version.txt")}"`,
+    `start /wait ${executable} -u NONE -c "${versionOutputCmd("version.txt")}" -c "qall!"`,
   ];
   await writeFile("version.bat", bat.join("\n"));
 
@@ -111,7 +110,7 @@ async function getWindowsGUIVersionOutput(executable: string): Promise<string> {
 
 async function getUnixGUIVersionOutput(executable: string): Promise<string> {
 
-  await retry(() => timeout(execFile(executable, ["--cmd", versionOutputCmd("version.txt")]), COMMAND_TIMEOUT), RETRY_COUNT);
+  await retry(() => timeout(execFile(executable, ["--cmd", versionOutputCmd("version.txt"), "--cmd", "qall!"]), COMMAND_TIMEOUT), RETRY_COUNT);
 
   return await readFile("version.txt", "utf8");
 }
