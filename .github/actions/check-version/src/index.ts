@@ -27,6 +27,18 @@ function timeout<T>(promise: Promise<T>, timeoutMilliseconds: number): Promise<T
   return Promise.race([promise, timeoutPromise]);
 }
 
+async function retry<T>(promiseMaker: () => Promise<T>, tryCount: number): Promise<T> {
+  let rejected: any;
+  while (0 < tryCount--) {
+    try {
+      return await promiseMaker();
+    } catch (e) {
+      rejected = e;
+    }
+  }
+  return Promise.reject(rejected);
+}
+
 // v8.2.0012 -> 8.2.12
 // v0.5.0 -> 0.5
 // v0.5.0-404-g49cd750d6 -> 49cd750d6
@@ -77,9 +89,10 @@ function extractVersionFromVersionOutput(verstionText: string): string {
 }
 
 const COMMAND_TIMEOUT = 20 * 1000;
+const RETRY_COUNT = 3;
 
 async function getCUIVersionOutput(executable: string): Promise<string> {
-  const {stdout} = await timeout(execFile(executable, ["--version"]), COMMAND_TIMEOUT);
+  const {stdout} = await retry(() => timeout(execFile(executable, ["--version"]), COMMAND_TIMEOUT), RETRY_COUNT);
   return stdout;
 }
 
@@ -91,14 +104,14 @@ async function getWindowsGUIVersionOutput(executable: string): Promise<string> {
   ];
   await writeFile("version.bat", bat.join("\n"));
 
-  await timeout(execFile("call", ["version.bat"], {shell: true}), COMMAND_TIMEOUT);
+  await retry(() => timeout(execFile("call", ["version.bat"], {shell: true}), COMMAND_TIMEOUT), RETRY_COUNT);
 
   return await readFile("version.txt", "utf8");
 }
 
 async function getUnixGUIVersionOutput(executable: string): Promise<string> {
 
-  await timeout(execFile(executable, ["--cmd", versionOutputCmd("version.txt")]), COMMAND_TIMEOUT);
+  await retry(() => timeout(execFile(executable, ["--cmd", versionOutputCmd("version.txt")]), COMMAND_TIMEOUT), RETRY_COUNT);
 
   return await readFile("version.txt", "utf8");
 }
