@@ -18,7 +18,7 @@ query($owner: String!, $repo: String!, $cursor: String) {
         node {
           description
           isLatest
-          releaseAssets(first: 10) {
+          releaseAssets(first: 20) {
             edges {
               node {
                 name
