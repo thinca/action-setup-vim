@@ -97,13 +97,15 @@ async function getCUIVersionOutput(executable: string): Promise<string> {
 
 async function getWindowsGUIVersionOutput(executable: string): Promise<string> {
   // gVim on Windows shows version info from "--version" via GUI dialog, so we use other approach.
+  const waitForRegisterSec = 2;
   const bat = [
     `start /wait ${executable} -silent -register`,
+    `ping -n ${waitForRegisterSec + 1} localhost > NUL`,
     `start /wait ${executable} -u NONE -c "${versionOutputCmd("version.txt")}" -c "qall!"`,
   ];
   await writeFile("version.bat", bat.join("\n"));
 
-  await retry(() => timeout(execFile("call", ["version.bat"], {shell: true}), COMMAND_TIMEOUT), RETRY_COUNT);
+  await retry(() => timeout(execFile("call", ["version.bat"], {shell: true}), COMMAND_TIMEOUT + waitForRegisterSec * 1000), RETRY_COUNT);
 
   return await readFile("version.txt", "utf8");
 }
