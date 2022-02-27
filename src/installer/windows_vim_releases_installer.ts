@@ -33,7 +33,7 @@ export class WindowsVimReleasesInstaller extends SemverReleasesInstaller {
     const installPath = this.getPath(vimVersion);
     fs.renameSync(targetDir, installPath);
 
-    fs.rmdirSync(tmpDir, {recursive: true});
+    fs.rmSync(tmpDir, {recursive: true});
   }
 
   getPath(vimVersion: FixedVersion): string {
