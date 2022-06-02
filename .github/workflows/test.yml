@@ -146,6 +146,9 @@ jobs:
             arch: 'x86'
           - dl_bd: 'AT'
             arch: 'x86'
+          # x86 in win32-installer sometimes missing
+          - dl_bd: 'DL'
+            arch: 'x86'
 
       fail-fast: false
 
