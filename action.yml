@@ -1,0 +1,97 @@
+name: 'Setup Vim'
+description: 'Setup Vim environment and add it to PATH'
+author: 'thinca <thinca@gmail.com>'
+
+inputs:
+  vim_version:
+    description: |-
+      Version of Vim.
+      The meaning of this value depends on `vim_type` and `download`.
+
+      `head` is always head version:
+      When `download` is enabled, this points head release.
+      When `download` is not enabled, this points master of repository.
+
+      When `download` is enabled and specified a semver such as `v8.2.0000`, this action finds a minimum version that is higher than a specified version.
+      For example:
+      When there are some released versions: `v8.2.0052` `v8.2.0057` `v8.2.0065`
+      And when a specified version is `v8.2.0055`, `v8.2.0057` is actually selected.
+
+    required: false
+    default: 'head'
+  vim_type:
+    description: |-
+      Type of Vim.
+      This is one of `vim`, `neovim`, or `macvim`.
+    required: false
+    default: 'vim'
+  gui:
+    description: |-
+      When this is `yes`, setups the GUI version.
+      And `outputs.executable` points to GUI version of Vim.
+    required: false
+    default: 'no'
+  arch:
+    description: |-
+      Architecture of Vim.
+      This is either of `x86_64` or `x86`, enable when `vim_type` is `vim` on Windows.
+    required: false
+    default: 'x86_64'
+  download:
+    description: |-
+      When this is `always`, downloads the officially released binary, or fail if unavailable.
+      When this is `available`, downloads the officially released binary if available, otherwise builds from source code.
+      When this is `never`, always builds from source code.
+    required: false
+    default: 'available'
+  cache:
+    description: |-
+      When this is `true`(default), cache the built Vim.
+
+      This uses same caching mechanism from actions/cache.
+      Therefore, this consumes the limitation of cache size.
+      https://help.github.com/en/actions/automating-your-workflow-with-github-actions/caching-dependencies-to-speed-up-workflows#usage-limits-and-eviction-policy
+
+      This is automatically disabled when `download` is enabled.
+    required: false
+    default: 'true'
+  github_token:
+    description: |-
+      Your GitHub API token to access to releases of repositories without limit.
+      Normally this is automatically set so you do not need set this.
+    required: false
+    default: '${{ github.token }}'
+
+outputs:
+  executable:
+    description: |-
+      The name of executable file.
+      This is not a full path, just name.
+      When `gui` is yes, this points to GUI version.
+      e.g. `vim` `nvim` `gvim`
+  executable_path:
+    description: |-
+      The full path of executable file.
+  actual_vim_version:
+    description: |-
+      Version of Vim actually installed.
+      e.g. `v8.2.0123` `v0.4.3`
+  install_type:
+    description: |-
+      Install was done with `build` or `download`.
+  install_path:
+    description: |-
+      Base path of installed Vim.
+      Note that this does not point to `bin`.
+  cache_hit:
+    description: |-
+      When `cache` is enabled and cache was found, this is `true`.  Otherwise this is `false`.
+
+branding:
+  icon: 'edit'
+  color: 'green'
+
+runs:
+  using: 'node16'
+  main: 'action.js'
+  post: 'action.js'
