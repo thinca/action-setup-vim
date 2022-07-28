@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Security: Update dependencies.
+- Fixed: Use correct version in built Neovim.
 
 
 ## v1.2.2 - 2022-06-03
