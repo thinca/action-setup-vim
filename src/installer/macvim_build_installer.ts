@@ -2,7 +2,7 @@ import * as path from "path";
 import {exec} from "@actions/exec";
 import * as io from "@actions/io";
 import {BuildInstaller} from "./build_installer";
-import {execGit, gitClone} from "../commands";
+import {execGit} from "../commands";
 import {FixedVersion} from "../interfaces";
 import {backportPatch} from "../patch";
 import {Buffer} from "buffer";
@@ -31,8 +31,7 @@ export class MacVimBuildInstaller extends BuildInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
     await exec("xcode-select", ["-p"]);
     const tag = this.tags[vimVersion] || vimVersion;
-    const reposPath = this.repositoryPath(vimVersion);
-    await gitClone("macvim-dev/macvim", tag, reposPath);
+    const reposPath = await this.cloneVim(tag);
     await backportPatch(reposPath, vimVersion);
 
     // To avoid `sed: RE error: illegal byte sequence` error, should set 'LC_ALL=C'.
