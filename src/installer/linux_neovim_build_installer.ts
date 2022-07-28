@@ -1,5 +1,4 @@
 import {exec} from "@actions/exec";
-import {gitClone} from "../commands";
 import {FixedVersion} from "../interfaces";
 import {NeovimBuildInstaller} from "./neovim_build_installer";
 import * as path from "path";
@@ -7,8 +6,7 @@ import {readFileSync} from "fs";
 
 export class LinuxNeovimBuildInstaller extends NeovimBuildInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
-    const reposPath = this.repositoryPath(vimVersion);
-    await gitClone("neovim/neovim", vimVersion, reposPath);
+    const reposPath = await this.cloneVim(vimVersion);
 
     const packages = [
       "ninja-build", "gettext", "libtool", "libtool-bin",
