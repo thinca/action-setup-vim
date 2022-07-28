@@ -57,9 +57,9 @@ export abstract class BuildInstaller implements Installer {
     return vimVersion.trim() as FixedVersion;
   }
 
-  async cloneVim(vimVersion: string, depth = 1): Promise<string> {
+  async cloneVim(vimVersion: string): Promise<string> {
     const reposPath = this.repositoryPath(vimVersion);
-    await gitClone(this.repository, vimVersion, reposPath, depth);
+    await gitClone(this.repository, vimVersion, reposPath, 1);
     return reposPath;
   }
 }
