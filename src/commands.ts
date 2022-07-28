@@ -15,14 +15,16 @@ export function execGit(args: Array<string>, options = {}): Promise<string> {
   });
 }
 
-export async function gitClone(ghRepo: string, vimVersion: string, dir: string, depth = 1): Promise<void> {
+export async function gitClone(ghRepo: string, vimVersion: string, dir: string, depth: number | null = 1): Promise<void> {
   if (fs.existsSync(dir)) {
     return;
   }
   const args = ["clone"];
   args.unshift("-c", "advice.detachedHead=false");
   args.push("--quiet");
-  args.push("--depth", `${depth}`);
+  if (depth != null) {
+    args.push("--depth", `${depth}`);
+  }
   args.push("--branch", vimVersion, `https://github.com/${ghRepo}`, dir);
   await exec("git", args);
 }

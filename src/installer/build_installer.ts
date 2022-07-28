@@ -47,7 +47,7 @@ export abstract class BuildInstaller implements Installer {
     }
 
     if (!isFixedVersion(vimVersion)) {
-      await gitClone(this.repository, vimVersion, this.repositoryPath(vimVersion), 100);
+      await gitClone(this.repository, vimVersion, this.repositoryPath(vimVersion), null);
       vimVersion = await this.obtainFixedVersion(vimVersion);
       if (!isFixedVersion(vimVersion)) {
         vimVersion = await execGit(["rev-parse", "HEAD"], {cwd: this.repositoryPath(vimVersion)});
