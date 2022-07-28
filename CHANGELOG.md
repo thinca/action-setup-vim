@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v1.2.3 - 2022-07-28
 
 - Security: Update dependencies.
 - Fixed: Use correct version in built Neovim.
