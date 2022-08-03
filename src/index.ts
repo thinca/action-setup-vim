@@ -45,31 +45,27 @@ async function main(): Promise<void> {
     await io.mkdirP(installPath);
 
     const cacheInput = core.getInput("cache");
-    const useCache = installer.installType == "build" && cacheInput === "true";
+    const cacheTest = /^test-/.test(cacheInput);
+    const useCache = installer.installType == "build" && (cacheInput === "true" || cacheTest);
 
     if (useCache) {
-      cacheHit = await cache.restoreCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion, download), []);
+      const cacheKeyPrefixForTest = cacheTest ? `${cacheInput}-` : "";
+      const cacheKey = `${cacheKeyPrefixForTest}${makeCacheKey(vimType, isGUI, fixedVersion, download)}`;
+      cacheHit = await cache.restoreCache([installPath], cacheKey, []);
       if (!cacheHit) {
         await installer.install(fixedVersion);
-        core.saveState("version", fixedVersion);
-        core.saveState("install_path", installPath);
+
+        // For test: Write cache immediately for next step.
+        if (cacheTest) {
+          await saveCache(installPath, cacheKey);
+        } else {
+          core.saveState("cache_key", cacheKey);
+          core.saveState("install_path", installPath);
+        }
       }
     } else {
       core.info("Cache disabled");
       await installer.install(fixedVersion);
-
-      // For test: Do not read cache but write immediately for next step.
-      if (cacheInput === "test") {
-        try {
-          await cache.saveCache([installPath], makeCacheKey(vimType, isGUI, fixedVersion, download));
-        } catch (e) {
-          if (e instanceof cache.ReserveCacheError) {
-            core.debug(`Error while caching binary in test: ${e.name}: ${e.message}`);
-          } else {
-            throw e;
-          }
-        }
-      }
     }
   }
 
@@ -86,24 +82,23 @@ async function main(): Promise<void> {
   core.setOutput("cache_hit", cacheHit ? "true" : "false");
 }
 
-async function post(): Promise<void> {
-  const version = core.getState("version");
-  if (version) {
-    const vimType = core.getInput("vim_type").toLowerCase();
-    const download = core.getInput("download");
-    const isGUI = core.getInput("gui") === "yes";
-    const installPath = core.getState("install_path");
-    if (isVimType(vimType)) {
-      try {
-        await cache.saveCache([installPath], makeCacheKey(vimType, isGUI, version, download));
-      } catch (e) {
-        if (e instanceof cache.ReserveCacheError) {
-          core.debug(`Error while caching binary in post: ${e.name}: ${e.message}`);
-        } else {
-          throw e;
-        }
-      }
+async function saveCache(installPath: string, cacheKey: string): Promise<void> {
+  try {
+    await cache.saveCache([installPath], cacheKey);
+  } catch (e) {
+    if (e instanceof cache.ReserveCacheError) {
+      core.debug(`Error while caching binary in post: ${e.name}: ${e.message}`);
+    } else {
+      throw e;
     }
+  }
+}
+
+async function post(): Promise<void> {
+  const cacheKey = core.getState("cache_key");
+  if (cacheKey) {
+    const installPath = core.getState("install_path");
+    await saveCache(installPath, cacheKey);
   }
 }
 
