@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed: Caching of GitHub Releases did not work probability.
 
 
 ## v1.2.3 - 2022-07-28
