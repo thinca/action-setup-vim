@@ -30,6 +30,7 @@ query($owner: String!, $repo: String!, $cursor: String) {
             oid
           }
           tagName
+          updatedAt
         }
       }
       pageInfo {
@@ -55,6 +56,7 @@ export type Release = {
     oid: string;
   };
   tagName: string;
+  updatedAt: string;
 }
 
 type Response = {
@@ -115,15 +117,6 @@ export abstract class ReleasesInstaller implements Installer {
   }
 
   private async fetchReleases(): Promise<Release[]> {
-    let releases: Release[] = [];
-
-    const cachePath = path.join(TEMP_PATH, `release-cache-${this.repository.replace(/^.+\//, "")}.json`);
-    const restoreKey = `releases--${this.repository}--`;
-    const cacheExists = await cache.restoreCache([cachePath], restoreKey, [restoreKey]);
-    if (cacheExists) {
-      releases = JSON.parse(fs.readFileSync(cachePath, {encoding: "utf8"})) as Release[];
-    }
-
     const [owner, repo] = this.repository.split("/");
     const parameters: RequestParameters = {
       owner: owner,
@@ -132,19 +125,52 @@ export abstract class ReleasesInstaller implements Installer {
         authorization: `bearer ${core.getInput("github_token")}`,
       },
     };
+
+    let releases: Release[] = [];
     const newReleases: Release[] = [];
+
     const availableVersion = toSemver(this.availableVersion) ?? this.availableVersion;
+
+    const cachePath = path.join(TEMP_PATH, `release-cache-${repo}.json`);
+    let cacheKey = "";
 
     fetching:
     for (;;) {
       const {repository}: DeepPartial<Response> = await graphql(RELEASES_QUERY, parameters);
       const resReleases = (repository?.releases?.edges?.map(node => node.node) || []) as Release[];
+
+      // First time.
+      if (newReleases.length === 0) {
+        const newestRelease = resReleases[0];
+        if (newestRelease == null) {
+          return [];
+        }
+        cacheKey = `releases-${this.repository}-${newestRelease.updatedAt}`;
+        core.debug(`[releases] Cache key: ${cacheKey}`);
+        const hitCacheKey = await cache.restoreCache([cachePath], cacheKey, [`releases-${this.repository}-`]);
+        const cacheHit = hitCacheKey === cacheKey;
+        core.debug(`[releases] Cache ${cacheHit ? "" : "not "}hit`);
+        // Complete cache exists: `cacheExists == true`
+        // Incomplete cache exists: `cacheExists == false` but the cache is restored.
+        // Cache does not exist: `cacheExists == false` and the cache is not restored.
+        if (fs.existsSync(cachePath)) {
+          releases = JSON.parse(fs.readFileSync(cachePath, {encoding: "utf8"})) as Release[];
+          core.debug(`[releases] Cache load: ${releases.length}`);
+          core.debug(`[releases] Head of cache: ${JSON.stringify(releases[0])}`);
+        }
+
+        if (cacheHit) {
+          return releases;
+        }
+      }
+
       for (const release of resReleases) {
         if (release.releaseAssets.edges.length === 0) {
           continue;
         }
         if (releases[0]?.tagName === release.tagName) {
           if (releases[0]?.tagCommit.oid === release.tagCommit?.oid) {
+            // Reach to the head of incomplete cache.
             break fetching;
           }
           // if A.tagCommit.oid != B.tagCommit.oid thouth A.tagName == B.tagName,
@@ -170,17 +196,16 @@ export abstract class ReleasesInstaller implements Installer {
       parameters.cursor = pageInfo?.endCursor;
     }
 
-    if (newReleases.length > 0) {
-      releases = newReleases.concat(releases);
-      fs.writeFileSync(cachePath, JSON.stringify(releases));
-      try {
-        await cache.saveCache([cachePath], `releases--${this.repository}--${Object.keys(releases).length}`);
-      } catch (e) {
-        if (e instanceof cache.ReserveCacheError) {
-          core.debug(`Error while caching releases: ${e.name}: ${e.message}`);
-        } else {
-          throw e;
-        }
+    releases = newReleases.concat(releases);
+    fs.writeFileSync(cachePath, JSON.stringify(releases));
+    try {
+      core.debug(`[releases] Save the cache: ${releases.length}`);
+      await cache.saveCache([cachePath], cacheKey);
+    } catch (e) {
+      if (e instanceof cache.ReserveCacheError) {
+        core.error(`Error while caching releases: ${e.name}: ${e.message}`);
+      } else {
+        throw e;
       }
     }
 

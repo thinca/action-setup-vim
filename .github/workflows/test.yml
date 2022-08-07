@@ -174,7 +174,16 @@ jobs:
           gui: '${{ matrix.gui }}'
           arch: '${{ matrix.arch }}'
           download: '${{ matrix.download }}'
-          cache: 'test'
+          cache: 'test-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}'
+      - name: 'Check Setup Vim is done without cache'
+        if: "matrix.download == 'never'"
+        run: |
+          if [[ "${{ steps.vim.outputs.cache_hit }}" == "true" ]]; then
+            echo "Cache should not hit, but hit."
+            exit 1
+          else
+            echo "Cache did not hit as expected."
+          fi
       - name: 'Check Vim version'
         uses: './actions/check-version'
         with:
@@ -197,6 +206,7 @@ jobs:
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
           download: '${{ matrix.download }}'
+          cache: 'test-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}'
       - name: 'Check Setup Vim is done with cache'
         if: "matrix.download == 'never'"
         run: |
