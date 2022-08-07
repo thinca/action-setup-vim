@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+
+
 ## v1.2.4 - 2022-08-07
 
 - Fixed: Caching of GitHub Releases did not work probability.
