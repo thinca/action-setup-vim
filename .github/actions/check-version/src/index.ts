@@ -38,33 +38,41 @@ async function retry<T>(promiseMaker: () => Promise<T>, tryCount: number): Promi
   return Promise.reject(rejected);
 }
 
-// v8.2.0012 -> 8.2.12
-// v0.5.0 -> 0.5
-// v0.5.0-404-g49cd750d6 -> 49cd750d6
-// v0.5.0-dev+1330-gd16e9d8ed -> d16e9d8ed
-// v0.5.0-nightly -> nightly
-// v0.5.0-dev+nightly -> nightly
-// 49cd750d6a72efc0571a89d7a874bbb01081227f -> 49cd750d6a72efc0571a89d7a874bbb01081227f
-function normalizeVersion(str: string): string {
+// "v8.2.0012" -> ["8.2.12", null]
+// "v0.5.0" -> ["0.5", null]
+// "v0.5.0-404-g49cd750d6" -> ["v0.5.0", "49cd750d6"]
+// "v0.5.0-dev+1330-gd16e9d8ed" -> ["v0.5.0", "d16e9d8ed"]
+// "v0.5.0-nightly" -> ["v0.5.0", "nightly"]
+// "v0.5.0-dev+nightly" -> ["v0.5.0", "nightly"]
+// "49cd750d6a72efc0571a89d7a874bbb01081227f" -> [null, "49cd750d6a72efc0571a89d7a874bbb01081227f"]
+function normalizeVersion(str: string): [string | null, string | null] {
   if (str.indexOf(".") < 0) {
-    return str;
+    // Probably sha1.
+    return [null, str];
   }
   str = str.replace("dev+", "");
-  const matched = /^.*-\d+-g([0-9a-f]{7,})$/.exec(str);
-  if (matched) {
-    return matched[1];
+
+  let semver: string | null = null;
+  let sha1OrTag: string | null = null;
+
+  const semverMatched = /^v?(\d+(?:\.\d+)*)/.exec(str);
+  if (semverMatched) {
+    semver = semverMatched[1].
+      replace(/(^|[^\d])0+(\d)/g, "$1$2").
+      replace(/(?:\.0)+$/, "");
   }
-  if (0 <= str.indexOf("-")) {
+  const sha1Matched = /^.*-\d+-g([0-9a-f]{7,})$/.exec(str);
+  if (sha1Matched) {
+    sha1OrTag = sha1Matched[1];
+  } else if (0 <= str.indexOf("-")) {
     const parts = str.split("-");
-    return parts[parts.length - 1];
+    sha1OrTag = parts[parts.length - 1];
   }
-  return str.
-    replace(/.*?(\d+(?:\.\d+)*).*/s, "$1").
-    replace(/(^|[^\d])0+(\d)/g, "$1$2").
-    replace(/(?:\.0)+$/, "");
+
+  return [semver, sha1OrTag];
 }
 
-function extractVersionFromVersionOutput(verstionText: string): string {
+function extractVersionFromVersionOutput(verstionText: string): [string | null, string | null] {
   const lines = verstionText.trimStart().split(/\r?\n/);
   const majorMinorMatched = /VIM - Vi IMproved (\d+)\.(\d+)/.exec(lines[0]);
   if (majorMinorMatched) {
@@ -84,7 +92,7 @@ function extractVersionFromVersionOutput(verstionText: string): string {
       return normalizeVersion(matched[1]);
     }
   }
-  return "";
+  return [null, null];
 }
 
 const COMMAND_TIMEOUT = 5 * 1000;
@@ -156,9 +164,9 @@ async function check(): Promise<string> {
 
   const versionOutput = (await getVersionOutput(vimType, isGUI, vimFile)).trim();
 
-  const actualVersion = extractVersionFromVersionOutput(versionOutput);
+  const [actualSemverVersion, actualSha1Version] = extractVersionFromVersionOutput(versionOutput);
 
-  core.info(`Actual Version: ${actualVersion}`);
+  core.info(`Actual Version: ${actualSemverVersion} ${actualSha1Version}`);
   core.info("-------");
   core.info(versionOutput);
   core.info("-------");
@@ -171,25 +179,25 @@ async function check(): Promise<string> {
     }
   }
 
-  const normalizedExpectedVersion = normalizeVersion(expectedVimVersion);
+  const [expectedSemverVersion, expectedSha1Version] = normalizeVersion(expectedVimVersion);
 
-  if (actualVersion === "nightly") {
-    return `Cannot check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
+  if (expectedSha1Version === "nightly") {
+    return `Cannot check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualSha1Version || actualSemverVersion}`;
   }
-  const isSha1 = /^[0-9a-f]{7,}$/.test(normalizedExpectedVersion);
-  if (isSha1) {
+
+  if (expectedSha1Version != null && actualSha1Version != null) {
     if (vimType === "neovim") {
-      if (normalizedExpectedVersion.startsWith(actualVersion)) {
+      if (expectedSha1Version.startsWith(actualSha1Version)) {
         return "Correct version installed";
       }
     } else {
-      return `Cannot check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`;
+      return `Cannot check the version:\nexpected: ${expectedVimVersion}\nactual: ${actualSha1Version}`;
     }
-  } else if (normalizedExpectedVersion === actualVersion) {
+  } else if (expectedSemverVersion === actualSemverVersion) {
     return "Correct version installed";
   }
 
-  throw Error(`Installed Vim's version is wrong:\nexpected: ${expectedVimVersion} (${normalizedExpectedVersion})\nactual: ${actualVersion}`);
+  throw Error(`Installed Vim's version is wrong:\nexpected: ${expectedVimVersion} (${expectedSemverVersion})\nactual: ${actualSemverVersion}`);
 }
 
 async function main(): Promise<void> {
