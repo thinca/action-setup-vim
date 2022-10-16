@@ -10,9 +10,9 @@ jobs:
     name: 'Setup actions'
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: 'actions/checkout@v2'
+      - uses: 'actions/checkout@v3'
       - name: 'Cache node packages'
-        uses: 'actions/cache@v2'
+        uses: 'actions/cache@v3'
         with:
           path: '~/.npm'
           key: "${{ hashFiles('package-lock.json') }}-${{ hashFiles('.github/actions/check-version/package-lock.json') }}"
@@ -29,7 +29,7 @@ jobs:
           mkdir -p ${{ github.workspace }}/actions/check-version
           cp action.js action.yml ${{ github.workspace }}/actions/check-version
       - name: 'Upload actions as artifact'
-        uses: 'actions/upload-artifact@v2'
+        uses: 'actions/upload-artifact@v3'
         with:
           name: 'actions'
           path: 'actions'
@@ -161,7 +161,7 @@ jobs:
 
     steps:
       - name: 'Download actions'
-        uses: 'actions/download-artifact@v2'
+        uses: 'actions/download-artifact@v3'
         with:
           name: 'actions'
           path: 'actions'
