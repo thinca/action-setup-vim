@@ -189,7 +189,7 @@ async function check(): Promise<string> {
     return "Correct version installed";
   }
 
-  throw Error(`Installed Vim's version is wrong:\nexpected: ${expectedVimVersion}\nactual: ${actualVersion}`);
+  throw Error(`Installed Vim's version is wrong:\nexpected: ${expectedVimVersion} (${normalizedExpectedVersion})\nactual: ${actualVersion}`);
 }
 
 async function main(): Promise<void> {
