@@ -42,6 +42,7 @@ async function retry<T>(promiseMaker: () => Promise<T>, tryCount: number): Promi
 // "v0.5.0" -> ["0.5", null]
 // "v0.5.0-404-g49cd750d6" -> ["v0.5.0", "49cd750d6"]
 // "v0.5.0-dev+1330-gd16e9d8ed" -> ["v0.5.0", "d16e9d8ed"]
+// "v0.5.0-dev-1330+gd16e9d8ed" -> ["v0.5.0", "d16e9d8ed"]
 // "v0.5.0-nightly" -> ["v0.5.0", "nightly"]
 // "v0.5.0-dev+nightly" -> ["v0.5.0", "nightly"]
 // "49cd750d6a72efc0571a89d7a874bbb01081227f" -> [null, "49cd750d6a72efc0571a89d7a874bbb01081227f"]
@@ -61,7 +62,7 @@ function normalizeVersion(str: string): [string | null, string | null] {
       replace(/(^|[^\d])0+(\d)/g, "$1$2").
       replace(/(?:\.0)+$/, "");
   }
-  const sha1Matched = /^.*-\d+-g([0-9a-f]{7,})$/.exec(str);
+  const sha1Matched = /^.*-\d+[-+]g([0-9a-f]{7,})$/.exec(str);
   if (sha1Matched) {
     sha1OrTag = sha1Matched[1];
   } else if (0 <= str.indexOf("-")) {
