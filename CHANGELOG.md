@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+- Security: Update dependencies.
+
+
 ## v1.2.6 - 2022-10-17
 
 - Security: Update dependencies.
