@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+- Fixed: AppImage did not work on Ubuntu 22.04.
+
+
 ## v1.2.7 - 2022-11-24
 
 - Security: Update dependencies.
