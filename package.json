@@ -7,7 +7,7 @@
     "url": "https://github.com/thinca/action-setup-vim/issues"
   },
   "dependencies": {
-    "@actions/cache": "^3.1.1",
+    "@actions/cache": "^3.1.2",
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
     "@actions/io": "^1.1.2",
@@ -18,10 +18,10 @@
   "devDependencies": {
     "@types/node": "^16.11.19",
     "@types/semver": "^7.3.13",
-    "@typescript-eslint/eslint-plugin": "^5.47.1",
-    "@typescript-eslint/parser": "^5.47.1",
-    "eslint": "^8.30.0",
-    "eslint-plugin-import": "^2.26.0",
+    "@typescript-eslint/eslint-plugin": "^5.48.1",
+    "@typescript-eslint/parser": "^5.48.1",
+    "eslint": "^8.31.0",
+    "eslint-plugin-import": "^2.27.2",
     "ts-loader": "^9.4.2",
     "typescript": "^4.9.4",
     "webpack": "^5.75.0",
