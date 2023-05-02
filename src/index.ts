@@ -24,6 +24,9 @@ async function main(): Promise<void> {
   const download = core.getInput("download");
   const isGUI = core.getInput("gui") === "yes";
   const inputVimVersion = core.getInput("vim_version");
+  if (!/^[a-zA-Z0-9.+-]+$/.test(inputVimVersion)) {
+    throw new ActionError(`Invalid vim_version: ${inputVimVersion}`);
+  }
 
   const installPath = path.join(TEMP_PATH, vimType, inputVimVersion);
   const installer = getInstaller(installPath, vimType, isGUI, download, inputVimVersion);
