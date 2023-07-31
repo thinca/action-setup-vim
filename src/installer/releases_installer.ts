@@ -6,6 +6,7 @@ import * as cache from "@actions/cache";
 import {downloadTool} from "@actions/tool-cache";
 import {graphql} from "@octokit/graphql";
 import {RequestParameters} from "@octokit/graphql/dist-types/types";
+import fetch from "node-fetch";
 import {ActionError} from "../action_error";
 import {FixedVersion, Installer, InstallType} from "../interfaces";
 import {TEMP_PATH} from "../temp";
@@ -123,6 +124,10 @@ export abstract class ReleasesInstaller implements Installer {
       repo: repo,
       headers: {
         authorization: `bearer ${core.getInput("github_token")}`,
+      },
+      // We can remove this when update Node.js to v18 or upper.
+      request: {
+        fetch,
       },
     };
 
