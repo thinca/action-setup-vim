@@ -27,7 +27,7 @@ function timeout<T>(promise: Promise<T>, timeoutMilliseconds: number): Promise<T
 }
 
 async function retry<T>(promiseMaker: () => Promise<T>, tryCount: number): Promise<T> {
-  let rejected: any;
+  let rejected: unknown;
   while (0 < tryCount--) {
     try {
       return await promiseMaker();

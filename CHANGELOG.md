@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+- Security: Update dependencies.
+
+
 ## v1.2.10 - 2023-05-02
 
 - Security: Update dependencies.
