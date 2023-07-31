@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v1.2.11 - 2023-08-01
 
 - Security: Update dependencies.
 
