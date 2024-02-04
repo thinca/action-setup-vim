@@ -92,6 +92,6 @@ branding:
   color: 'green'
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'action.js'
   post: 'action.js'
