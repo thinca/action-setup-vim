@@ -13,12 +13,10 @@
     "@types/node": "^20.11.17",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "esbuild": "0.20.0",
     "eslint": "^8.56.0",
     "eslint-plugin-import": "^2.29.1",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.3.3",
-    "webpack": "^5.90.1",
-    "webpack-cli": "^5.1.4"
+    "typescript": "^5.3.3"
   },
   "homepage": "https://github.com/thinca/setup-vim-action",
   "keywords": [
@@ -35,7 +33,7 @@
     "url": "git+https://github.com/thinca/setup-vim-action.git"
   },
   "scripts": {
-    "build": "webpack-cli",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=action.js",
     "lint": "eslint '**/*.ts'",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
