@@ -7,25 +7,25 @@
     "url": "https://github.com/thinca/action-setup-vim/issues"
   },
   "dependencies": {
-    "@actions/cache": "^3.2.1",
-    "@actions/core": "^1.10.0",
+    "@actions/cache": "^3.2.4",
+    "@actions/core": "^1.10.1",
     "@actions/exec": "^1.1.1",
     "@actions/io": "^1.1.3",
     "@actions/tool-cache": "^2.0.1",
-    "@octokit/graphql": "^7.0.1",
+    "@octokit/graphql": "^7.0.2",
     "node-fetch": "^3.3.2",
-    "semver": "^7.5.4"
+    "semver": "^7.6.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.16",
-    "@types/semver": "^7.5.0",
-    "@typescript-eslint/eslint-plugin": "^6.2.1",
-    "@typescript-eslint/parser": "^6.2.1",
-    "eslint": "^8.46.0",
-    "eslint-plugin-import": "^2.28.0",
-    "ts-loader": "^9.4.4",
-    "typescript": "^5.1.6",
-    "webpack": "^5.88.2",
+    "@types/node": "^20.11.17",
+    "@types/semver": "^7.5.7",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.90.1",
     "webpack-cli": "^5.1.4"
   },
   "homepage": "https://github.com/thinca/action-setup-vim",
