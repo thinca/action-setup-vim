@@ -12,13 +12,13 @@ Basic:
 
 ```yaml
 # Setup the head version of Vim
-- uses: thinca/action-setup-vim@v1
+- uses: thinca/action-setup-vim@v2
 ```
 
 With options:
 
 ```yaml
-- uses: thinca/action-setup-vim@v1
+- uses: thinca/action-setup-vim@v2
   with:
     vim_version: v9.1.0000
 ```
@@ -40,7 +40,7 @@ steps:
   - uses: 'actions/checkout@v4'
   - name: 'Setup Vim'
     id: 'vim'
-    uses: 'thinca/action-setup-vim@v1'
+    uses: 'thinca/action-setup-vim@v2'
     with:
       vim_version: '${{ matrix.vim_version || matrix.version }}'
       vim_type: '${{ matrix.vim_type }}'
