@@ -33,7 +33,7 @@ jobs:
           BODY_JSON=$(echo -n "${BODY}" | jq --raw-input --slurp .)
 
           npm ci
-          npm run --silent build -- --mode=production
+          npm run --silent build
           git switch --orphan release
           git checkout "${GITHUB_SHA}" -- action.yml README.md
           git add action.js
