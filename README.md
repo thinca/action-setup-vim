@@ -20,7 +20,7 @@ With options:
 ```yaml
 - uses: thinca/action-setup-vim@v1
   with:
-    vim_version: v8.2.0000
+    vim_version: v9.1.0000
 ```
 
 Setup Vim and Neovim with 2 versions for each platforms using matrix:
@@ -34,10 +34,10 @@ strategy:
     include:
       - vim_type: 'Vim'
         version: 'stable'
-        vim_version: 'v8.2.0000'
+        vim_version: 'v9.1.0000'
 runs-on: '${{ matrix.os }}'
 steps:
-  - uses: 'actions/checkout@v2'
+  - uses: 'actions/checkout@v4'
   - name: 'Setup Vim'
     id: 'vim'
     uses: 'thinca/action-setup-vim@v1'
@@ -61,7 +61,7 @@ This action provides two ways to setup Vim.
     The result is cached by default.  See [`cache`](#cache) input.
 
 2.  Download pre-built Vim from releases page.
-    You can specify semver(v8.2.0123, v0.4.3) or tag name of GitHub Release for [`vim_version`](#vim_version).
+    You can specify semver(v9.1.0146, v0.9.5) or tag name of GitHub Release for [`vim_version`](#vim_version).
 
 Some combinations not available.  See the following.
 By default, uses `download` if available, otherwise uses `build`.
@@ -132,7 +132,7 @@ And when a specified version is `v8.2.0055`, `v8.2.0057` is actually selected.
 Also, when a specified version is `v8.2.0060`, `v8.2.0065` is actually selected.
 
 When `download` is off, this is a tag of repository.
-Note that the repository of MacVim has tags like `snapshot-xxx` instead of like `vx.x.xxx`.
+Note that the repository of MacVim has tags like `release-xxx` instead of like `vx.x.xxx`.
 
 default: `head`
 
