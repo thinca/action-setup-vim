@@ -2,12 +2,12 @@
 
 # Release script
 #
-# Usage: ./script/release 1.0.0
+# Usage: ./script/release {major|minor|patch}
 # Run on develop branch.
 #
 # This script executes:
-# 1. Version bump in CHANGELOG.md, package{,-lock}.json, index.ts and commit
-# 2. Merge "develop" into "master"
+# 1. Merge "develop" into "master"
+# 2. Version bump in CHANGELOG.md, README.md, package{,-lock}.json, index.ts and commit
 # 3. Create a new tag with annotation containing release note
 
 set -eu
@@ -41,15 +41,17 @@ git checkout master
 git merge --no-edit --no-ff develop
 
 new_version=$(npm version --no-git-tag-version "${version}")
+new_version_major=$(sed -e 's/\..*//' <<< "${new_version}")
 
 new_version_header="${new_version} - $(date '+%Y-%m-%d')"
 tag_message="${new_version_header}
 
 ${release_note}"
 
+sed -i -e "s;thinca/action-setup-vim@v[0-9]\\+;thinca/action-setup-vim@${new_version_major};" README.md
 sed -i -e "s/^## Unreleased$/## ${new_version_header}/" CHANGELOG.md
 sed -i -e "s/^const actionVersion = \".\\+\";$/const actionVersion = \"${new_version#v}\";/" src/index.ts
-git add CHANGELOG.md src/index.ts package.json package-lock.json
+git add README.md CHANGELOG.md src/index.ts package.json package-lock.json
 
 git commit -m "${new_version}"
 echo "${tag_message}" | git tag -s -F - "${new_version}+src"
