@@ -13,7 +13,7 @@ jobs:
     if: "github.event.workflow_run.conclusion == 'success'"
     runs-on: 'ubuntu-latest'
     steps:
-      - uses: 'actions/checkout@v2'
+      - uses: 'actions/checkout@v4'
       - name: 'Release a new version'
         run: |
           set -x
@@ -33,7 +33,7 @@ jobs:
           BODY_JSON=$(echo -n "${BODY}" | jq --raw-input --slurp .)
 
           npm ci
-          npm run --silent build -- --mode=production
+          npm run --silent build
           git switch --orphan release
           git checkout "${GITHUB_SHA}" -- action.yml README.md
           git add action.js

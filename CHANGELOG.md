@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Unreleased
+
+- Breaking Change: Update Node 16 to Node 20 the actions.
+- Security: Update dependencies.
+
+
 ## v1.2.11 - 2023-08-01
 
 - Security: Update dependencies.

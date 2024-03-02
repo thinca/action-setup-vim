@@ -6,7 +6,6 @@ import * as cache from "@actions/cache";
 import {downloadTool} from "@actions/tool-cache";
 import {graphql} from "@octokit/graphql";
 import {RequestParameters} from "@octokit/graphql/dist-types/types";
-import fetch from "node-fetch";
 import {ActionError} from "../action_error";
 import {FixedVersion, Installer, InstallType} from "../interfaces";
 import {TEMP_PATH} from "../temp";
