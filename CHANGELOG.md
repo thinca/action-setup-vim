@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v2.0.0 - 2024-03-02
 
 - Breaking Change: Update Node 16 to Node 20 the actions.
 - Security: Update dependencies.
