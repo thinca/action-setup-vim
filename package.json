@@ -16,14 +16,14 @@
     "semver": "^7.6.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
+    "@types/node": "^20.11.30",
     "@types/semver": "^7.5.8",
-    "@typescript-eslint/eslint-plugin": "^7.1.0",
-    "@typescript-eslint/parser": "^7.1.0",
-    "esbuild": "0.20.1",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
+    "esbuild": "0.20.2",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.3"
   },
   "homepage": "https://github.com/thinca/action-setup-vim",
   "keywords": [
