@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+
+
 ## v2.0.1 - 2024-03-29
 
 - Fixed: Downloading Neovim in Mac.  (Thanks [@mityu](https://github.com/mityu) [#14](https://github.com/thinca/action-setup-vim/pull/14))
