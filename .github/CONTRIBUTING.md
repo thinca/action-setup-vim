@@ -28,6 +28,18 @@ Please consider opening a issue before opening a PR when your proposal is big.
 
 ### About Git Repository
 
+#### Branches
+
+There are two important branches.
+
+- `develop` branch
+  - A branch for development.
+  - Please send a Pull Request to this if this exists.
+- `master` branch
+  - A branch for release.
+  - Do not send a Pull Request to this branch.
+
+
 #### Commits
 
 Keep clean.  When you pushed dirty commits, please organize before merge.
