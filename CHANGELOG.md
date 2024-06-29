@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed: Remove unnecessary packages in MacOS Neovim build installer.
 
 
 ## v2.0.3 - 2024-06-26
