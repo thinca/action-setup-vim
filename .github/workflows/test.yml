@@ -56,7 +56,7 @@ jobs:
     strategy:
       matrix:
         vim_type: ['Vim', 'Neovim', 'MacVim']
-        vim_version: ['head', 'prev1', 'prev2']
+        vim_version: ['head', 'prev1', 'prev2', 'prev3']
         platform: ['Linux', 'MacOS', 'Windows']
         gui_cui: ['GUI', 'CUI']
         dl_bd: ['DL', 'AT', 'BD']
@@ -97,18 +97,27 @@ jobs:
           - vim_type: 'Vim'
             vim_version: 'prev2'
             version: 'v9.0.0000'
+          - vim_type: 'Vim'
+            vim_version: 'prev3'
+            version: 'v8.2.0000'
           - vim_type: 'Neovim'
             vim_version: 'prev1'
             version: 'v0.10.2'
           - vim_type: 'Neovim'
             vim_version: 'prev2'
             version: 'v0.9.5'
+          - vim_type: 'Neovim'
+            vim_version: 'prev3'
+            version: 'v0.9.0'
           - vim_type: 'MacVim'
             vim_version: 'prev1'
             version: 'release-179'  # v9.1.0000
           - vim_type: 'MacVim'
             vim_version: 'prev2'
             version: 'snapshot-173'  # v9.0.0065
+          - vim_type: 'MacVim'
+            vim_version: 'prev3'
+            version: 'snapshot-162'  # v8.2.319
 
         exclude:
           # DL Vim on MacOS is unavailable
