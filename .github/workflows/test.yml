@@ -99,13 +99,13 @@ jobs:
             version: 'v9.0.0000'
           - vim_type: 'Neovim'
             vim_version: 'prev1'
-            version: 'v0.9.5'
+            version: 'v0.10.2'
           - vim_type: 'Neovim'
             vim_version: 'prev2'
-            version: 'stable'
+            version: 'v0.9.5'
           - vim_type: 'MacVim'
             vim_version: 'prev1'
-            version: 'release-178'  # v9.0.1897
+            version: 'release-179'  # v9.1.0000
           - vim_type: 'MacVim'
             vim_version: 'prev2'
             version: 'snapshot-173'  # v9.0.0065
