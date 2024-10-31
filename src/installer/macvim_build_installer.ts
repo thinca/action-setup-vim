@@ -60,6 +60,11 @@ export class MacVimBuildInstaller extends BuildInstaller {
       `.trim() + "\n";
       await exec("patch", ["-p1"], {cwd: reposPath, input: Buffer.from(patch)});
     }
+
+    if (semver.lte(vimVersion, "8.2.5135", true)) {
+      args.push("CFLAGS=-Wno-implicit-int");
+    }
+
     await exec("./configure", args, {cwd: reposPath});
     await exec("make", [], {cwd: reposPath});
     await io.mkdirP(this.installDir);
