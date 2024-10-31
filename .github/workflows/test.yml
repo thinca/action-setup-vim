@@ -52,72 +52,92 @@ jobs:
         run: echo "${{ steps.rate_limit.outputs.data }}"
 
   test:
-    name: "${{ matrix.gui_cui }}/${{ matrix.dl_bd }}: ${{ matrix.vim_type }} ${{ matrix.version || matrix.vim_version }} on ${{ matrix.platform }}${{ matrix.arch == 'x86' && ' (x86)' || ''}}"
+    name: "${{ matrix.gui_cui }}/${{ matrix.dl_bd }}: ${{ matrix.vim_type }} ${{ matrix.vim_version }} on ${{ matrix.platform }}${{ matrix.arch == 'x86' && ' (x86)' || ''}}"
     strategy:
       matrix:
-        vim_type: ['Vim', 'Neovim', 'MacVim']
-        vim_version: ['head', 'prev1', 'prev2', 'prev3']
-        platform: ['Linux', 'MacOS', 'Windows']
-        gui_cui: ['GUI', 'CUI']
-        dl_bd: ['DL', 'AT', 'BD']
+        vim_type: ['Vim']
+        # vim_version: ['head']
+        # platform: ['MacOS']
+        gui_cui: ['CUI']
+        dl_bd: ['BD']
         arch: ['x86_64']
+        # vim_type: ['Vim', 'Neovim', 'MacVim']
+        # vim_version: ['head', 'prev1', 'prev2', 'prev3']
+        platform: ['Windows']
+        # gui_cui: ['GUI', 'CUI']
+        # dl_bd: ['DL', 'AT', 'BD']
+        # arch: ['x86_64']
 
         include:
           # aliases
-          - platform: 'Linux'
-            os: 'ubuntu-latest'
-          - platform: 'MacOS'
-            os: 'macos-latest'
+          # - platform: 'Linux'
+          #   os: 'ubuntu-latest'
+          # - platform: 'MacOS'
+          #   os: 'macos-latest'
           - platform: 'Windows'
             os: 'windows-latest'
-          - gui_cui: 'GUI'
-            gui: 'yes'
+          # - gui_cui: 'GUI'
+          #   gui: 'yes'
           - gui_cui: 'CUI'
             gui: 'no'
-          - dl_bd: 'DL'
-            download: 'always'
-          - dl_bd: 'AT'
-            download: 'available'
+          # - dl_bd: 'DL'
+          #   download: 'always'
+          # - dl_bd: 'AT'
+          #   download: 'available'
           - dl_bd: 'BD'
             download: 'never'
           # arch=x86 is only for Windows GUI head
-          - vim_type: 'Vim'
-            platform: 'Windows'
-            os: 'windows-latest'
-            version: 'head'
-            gui_cui: 'GUI'
-            gui: 'yes'
-            dl_bd: 'BD'
-            download: 'never'
-            arch: 'x86'
+          # - vim_type: 'Vim'
+          #   platform: 'Windows'
+          #   os: 'windows-latest'
+          #   version: 'head'
+          #   gui_cui: 'GUI'
+          #   gui: 'yes'
+          #   dl_bd: 'BD'
+          #   download: 'never'
+          #   arch: 'x86'
           # Add versions
+          # - vim_type: 'Vim'
+          #   vim_version: 'prev1'
+          #   version: 'v9.1.0000'
+          # - vim_type: 'Vim'
+          #   vim_version: 'prev2'
+          #   version: 'v9.0.0000'
+          # - vim_type: 'Vim'
+          #   vim_version: 'prev3'
+          #   version: 'v8.2.0000'
           - vim_type: 'Vim'
-            vim_version: 'prev1'
-            version: 'v9.1.0000'
+            vim_version: 'v8.1.0001'
+          # - vim_type: 'Vim'
+          #   vim_version: 'v8.0.0001'
           - vim_type: 'Vim'
-            vim_version: 'prev2'
-            version: 'v9.0.0000'
-          - vim_type: 'Vim'
-            vim_version: 'prev3'
-            version: 'v8.2.0000'
-          - vim_type: 'Neovim'
-            vim_version: 'prev1'
-            version: 'v0.10.2'
-          - vim_type: 'Neovim'
-            vim_version: 'prev2'
-            version: 'v0.9.5'
-          - vim_type: 'Neovim'
-            vim_version: 'prev3'
-            version: 'v0.9.0'
-          - vim_type: 'MacVim'
-            vim_version: 'prev1'
-            version: 'release-179'  # v9.1.0000
-          - vim_type: 'MacVim'
-            vim_version: 'prev2'
-            version: 'snapshot-173'  # v9.0.0065
-          - vim_type: 'MacVim'
-            vim_version: 'prev3'
-            version: 'snapshot-162'  # v8.2.319
+            vim_version: 'v7.4'
+          # - vim_type: 'Neovim'
+          #   vim_version: 'prev1'
+          #   version: 'v0.10.2'
+          # - vim_type: 'Neovim'
+          #   vim_version: 'prev2'
+          #   version: 'v0.9.5'
+          # - vim_type: 'Neovim'
+          #   vim_version: 'prev3'
+          #   version: 'v0.9.0'
+          # - vim_type: 'MacVim'
+          #   vim_version: 'prev1'
+          #   version: 'release-179'  # v9.1.0000
+          # - vim_type: 'MacVim'
+          #   vim_version: 'prev2'
+          #   version: 'snapshot-173'  # v9.0.0065
+          # - vim_type: 'MacVim'
+          #   vim_version: 'prev3'
+          #   version: 'snapshot-162'  # v8.2.319
+          # - vim_type: 'MacVim'
+          #   vim_version: 'prev4'
+          #   version: 'snapshot-148'  # v8.1.0039
+          # - vim_type: 'MacVim'
+          #   vim_version: 'prev5'
+          #   version: 'snapshot-110'  # v8.0.0003
+          # - vim_type: 'MacVim'
+          #   vim_version: 'snapshot-74'  # v7.4.622
 
         exclude:
           # DL Vim on MacOS is unavailable
@@ -162,7 +182,7 @@ jobs:
         id: 'vim'
         uses: './actions/setup-vim'
         with:
-          vim_version: '${{ matrix.version || matrix.vim_version }}'
+          vim_version: '${{ matrix.vim_version }}'
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
           arch: '${{ matrix.arch }}'
@@ -186,6 +206,65 @@ jobs:
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
           arch: '${{ matrix.arch }}'
+      - if: 'failure()'
+        run: |
+          cd $RUNNER_TEMP/repos/vim/v7.4
+          git diff
+          git checkout .
+          cat > test.sh <<EOF
+
+          git diff @ v7.4.960 | git apply --include src/Make_mvc.mak
+
+          vim -es <<VIM
+          :e src/GvimExt/Makefile
+          /^!include <Win32.mak>
+          :.-1,.d
+          :i
+          !elseif "$(USE_WIN32MAK)"=="yes"
+          !include <Win32.mak>
+          !else
+          cc = cl
+          link = link
+          rc = rc
+          cflags = -nologo -c
+          lflags = -incremental:no -nologo
+          rcflags = /r
+          olelibsdll = ole32.lib uuid.lib oleaut32.lib user32.lib gdi32.lib advapi32.lib
+          .
+          :w
+          :e src/Make_mvc.mak
+          /^!include <Win32.mak>
+          :.-1,.d
+          :i
+          !elseif "$(USE_WIN32MAK)"=="yes"
+          !include <Win32.mak>
+          !else
+          link = link
+          .
+          :wq
+          VIM
+
+          git diff
+
+          cd src
+          cmd.exe //c install.bat
+          result=\$?
+          echo "Result: \$result"
+          git checkout .
+          if [[ "\$result" == '0' ]]; then
+            echo "exit 1"
+            exit 1
+          fi
+          echo "exit 0"
+          EOF
+          git fetch origin --tags -q
+          git bisect start
+          git bisect old v7.4
+          git bisect new v7.4.960
+          git bisect run bash ./test.sh
+      # - uses: mxschmitt/action-tmate@v3
+      #   if: failure()
+      #   timeout-minutes: 300
       - name: 'Delete installed Vim to reinstall'
         if: "matrix.download == 'never'"
         run: |
@@ -225,6 +304,7 @@ jobs:
             os: 'windows-latest'
       fail-fast: false
 
+    if: false
     needs: 'setup-actions'
     runs-on: '${{ matrix.os }}'
     defaults:

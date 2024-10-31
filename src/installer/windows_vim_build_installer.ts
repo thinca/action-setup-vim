@@ -24,6 +24,7 @@ export class WindowsVimBuildInstaller extends VimBuildInstaller {
     sed -e "s/@<<$/@<< | sed -e 's#.*\\\\r.*##'/" Make_mvc.mak > Make_mvc2.mak
 
     nmake -nologo -f Make_mvc2.mak ${guiOptions} FEATURES=HUGE IME=yes MBYTE=yes ICONV=yes DEBUG=no TERMINAL=yes
+    if %ERRORLEVEL% neq 0 exit /b %ERRORLEVEL%
 
     copy /Y ..\\README.txt ..\\runtime
     copy /Y ..\\vimtutor.bat ..\\runtime
