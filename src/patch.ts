@@ -8,6 +8,11 @@ export async function backportPatch(reposPath: string, vimVersion: string): Prom
     return;
   }
 
+  if (semver.lt(vimSemver, "7.4.55")) {
+    // To avoid `conflicting types for 'sigaltstack'`
+    await exec("sh", ["-c", "curl -s https://github.com/vim/vim/compare/v7.4.054...v7.4.055.diff | git apply --exclude src/version.c"], {cwd: reposPath});
+  }
+
   if (semver.lt(vimSemver, "8.2.1119")) {
     // Workaround:
     // Building Vim before v8.2.1119 on MacOS will fail because default Xcode was changed to 12.
