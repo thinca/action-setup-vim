@@ -13,6 +13,14 @@ export async function backportPatch(reposPath: string, vimVersion: string): Prom
     await exec("sh", ["-c", "curl -s https://github.com/vim/vim/compare/v7.4.054...v7.4.055.diff | git apply --exclude src/version.c"], {cwd: reposPath});
   }
 
+  if (semver.lt(vimSemver, "7.4.1648")) {
+    // Vim crashes causes by `Trace/BPT trap: 5` on MacOS.
+    // Apply patch 7.4.1648.
+    // Cannot use `git apply` because of context mismatch.
+    await exec("sed", ["-i", "", "-e", "/#define VV_NAME/s/, {0}$//", "-e", "/static struct vimvar/,+4s/dictitem_T/dictitem16_T/;/char[[:blank:]]*vv_filler.*/d", "src/eval.c"], {cwd: reposPath});
+    await exec("sed", ["-i", "", "/typedef struct dictitem_S dictitem_T;/a\\\nstruct dictitem16_S {\\\n  typval_T di_tv;\\\n  char_u di_flags;\\\n  char_u di_key[17];\\\n};\\\ntypedef struct dictitem16_S dictitem16_T;", "src/structs.h"], {cwd: reposPath});
+  }
+
   if (semver.lt(vimSemver, "8.2.1119")) {
     // Workaround:
     // Building Vim before v8.2.1119 on MacOS will fail because default Xcode was changed to 12.
