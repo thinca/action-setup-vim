@@ -18,7 +18,7 @@ export class MacVimBuildInstaller extends BuildInstaller {
 
   async obtainFixedVersion(vimVersion: string): Promise<string> {
     const log = await execGit(["log", "-20", "--format=format:%s"], {cwd: this.repositoryPath(vimVersion)});
-    const matched = /^\s*patch\s+v?(\d+\.\d+\.\d+)/m.exec(log);
+    const matched = /^\s*(?:patch|updated for version)\s+v?(\d+\.\d+\.\d+)/m.exec(log);
     if (matched) {
       const version = `v${matched[1]}`;
       const tag = await super.obtainFixedVersion(vimVersion);
