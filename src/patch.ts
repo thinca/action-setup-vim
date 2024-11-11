@@ -8,8 +8,47 @@ export async function backportPatch(reposPath: string, vimVersion: string): Prom
     return;
   }
 
+  if (process.platform === "win32") {
+    await backportPatchForWindows(reposPath, vimSemver);
+  }
   if (process.platform === "darwin") {
     await backportPatchForMacOS(reposPath, vimSemver);
+  }
+}
+
+export async function backportPatchForWindows(reposPath: string, vimVersion: semver.SemVer): Promise<void> {
+  if (semver.lt(vimVersion, "8.0.881")) {
+    // Apply patch 8.0.0881.
+    // We use Vim to apply this patch because it is difficult with `git apply` or `sed`.
+    const script =`
+:e src/GvimExt/Makefile
+/^!include <Win32.mak>
+:.-1,.d
+:i
+!elseif "$(USE_WIN32MAK)"=="yes"
+!include <Win32.mak>
+!else
+cc = cl
+link = link
+rc = rc
+cflags = -nologo -c
+lflags = -incremental:no -nologo
+rcflags = /r
+olelibsdll = ole32.lib uuid.lib oleaut32.lib user32.lib gdi32.lib advapi32.lib
+.
+:w
+:e src/Make_mvc.mak
+/^!include <Win32.mak>
+:.-1,.d
+:i
+!elseif "$(USE_WIN32MAK)"=="yes"
+!include <Win32.mak>
+!else
+link = link
+.
+:wq
+`;
+    await exec("vim", ["-es"], {cwd: reposPath, input: Buffer.from(script), ignoreReturnCode: true});
   }
 }
 

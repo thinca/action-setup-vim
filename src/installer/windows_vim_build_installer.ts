@@ -3,12 +3,14 @@ import * as path from "path";
 import * as core from "@actions/core";
 import {exec} from "@actions/exec";
 import * as io from "@actions/io";
+import {backportPatch} from "../patch";
 import {FixedVersion} from "../interfaces";
 import {VimBuildInstaller} from "./vim_build_installer";
 
 export class WindowsVimBuildInstaller extends VimBuildInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
     const reposPath = await this.cloneVim(vimVersion);
+    await backportPatch(reposPath, vimVersion);
     const arch = core.getInput("arch").includes("64") ? "x64" : "x86";
     const srcPath = path.join(reposPath, "src");
     const batPath = path.join(srcPath, "install.bat");
