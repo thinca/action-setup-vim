@@ -9,14 +9,22 @@ export async function backportPatch(reposPath: string, vimVersion: string): Prom
   }
 
   if (process.platform === "win32") {
-    await backportPatchForWindows(reposPath, vimSemver);
+    await backportPatchForWindows(reposPath, vimSemver, vimVersion);
   }
   if (process.platform === "darwin") {
     await backportPatchForMacOS(reposPath, vimSemver);
   }
 }
 
-export async function backportPatchForWindows(reposPath: string, vimVersion: semver.SemVer): Promise<void> {
+export async function backportPatchForWindows(reposPath: string, vimVersion: semver.SemVer, vimVersionString: string): Promise<void> {
+  if (semver.lt(vimVersion, "7.4.960")) {
+    await exec("sh", ["-c", `curl -s https://github.com/vim/vim/compare/${vimVersionString}...v7.4.960.diff | git apply --include src/Make_mvc.mak`], {cwd: reposPath});
+    if (semver.lt(vimVersion, "7.4.399")) {
+      // After patch 7.4.399, `crypt` files are separeted.
+      await exec("sed", ["-i", "/crypt/d", "src/Make_mvc.mak"], {cwd: reposPath});
+    }
+  }
+
   if (semver.lt(vimVersion, "8.0.881")) {
     // Apply patch 8.0.0881.
     // We use Vim to apply this patch because it is difficult with `git apply` or `sed`.
