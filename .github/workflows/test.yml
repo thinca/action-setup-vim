@@ -51,92 +51,112 @@ jobs:
       - name: 'Show GitHub GraphQL API rate limit'
         run: echo "${{ steps.rate_limit.outputs.data }}"
 
+
+  generate-matrix:
+    name: 'Generate matrix'
+    runs-on: 'ubuntu-latest'
+    outputs:
+      matrix: ${{ steps.generate.outputs.result }}
+    steps:
+      - name: 'Generate matrix'
+        id: generate
+        uses: 'actions/github-script@v7'
+        with:
+          script: |
+            const matrix = [
+              ["Vim", "head"],
+              ["Vim", "v9.1.0000"],
+              ["Vim", "v9.0.0000"],
+              ["Neovim", "head"],
+              ["Neovim", "v0.9.5"],
+              ["Neovim", "stable"],
+              ["MacVim", "head"],
+              ["MacVim", "release-178"],  // v9.0.1897
+              ["MacVim", "snapshot-173"],  // v9.0.0065
+            ].flatMap(([vim_type, vim_version]) =>
+              ["Linux", "MacOS", "Windows"].map(platform => ({
+                vim_type,
+                vim_version,
+                platform,
+              }))
+            ).flatMap((param) =>
+              ["GUI", "CUI"].map((gui_cui) => ({
+                ...param,
+                gui_cui,
+              }))
+            ).flatMap((param) =>
+              ["DL", "AT", "BD"].map((dl_bd) => ({
+                ...param,
+                dl_bd,
+              }))
+            ).flatMap((param) =>
+              ["x86_64"].map((arch) => ({
+                ...param,
+                arch,
+              }))
+            ).concat(
+              [
+                {
+                  vim_type: "Vim",
+                  vim_version: "head",
+                  platform: "Windows",
+                  gui_cui: "GUI",
+                  dl_bd: "BD",
+                  arch: "x86",
+                },
+              ]
+            ).filter(({ vim_type, vim_version, platform, gui_cui, dl_bd }) => {
+              // DL Vim on MacOS is unavailable
+              if (vim_type === "Vim" && platform === "MacOS" && dl_bd === "DL") {
+                return false;
+              }
+              // GUI version of Neovim is unavailable (also skip on Windows)
+              if (vim_type === "Neovim" && gui_cui === "GUI") {
+                return false;
+              }
+              // Build Neovim on Windows is not supported yet
+              if (vim_type === "Neovim" && platform === "Windows" && dl_bd === "BD") {
+                return false;
+              }
+              // GUI version of MacVim is unavailable
+              if (platform === "MacOS" && gui_cui === "GUI") {
+                return false;
+              }
+              // MacVim is available only on MacOS
+              if (vim_type === "MacVim" && platform !== "MacOS") {
+                return false;
+              }
+              return true;
+            }).map(({ vim_type, vim_version, platform, gui_cui, dl_bd }) => ({
+              vim_type,
+              vim_version,
+              platform,
+              gui_cui,
+              dl_bd,
+              os: {
+                Linux: "ubuntu-latest",
+                MacOS: "macos-latest",
+                Windows: "windows-latest",
+              }[platform],
+              gui: gui_cui === "GUI" ? "yes" : "no",
+              download: {
+                DL: "always",
+                AT: "available",
+                BD: "never",
+              }[dl_bd],
+            }));
+            console.log(JSON.stringify(matrix, null, 2));
+            return { include: matrix };
+
   test:
-    name: "${{ matrix.gui_cui }}/${{ matrix.dl_bd }}: ${{ matrix.vim_type }} ${{ matrix.version || matrix.vim_version }} on ${{ matrix.platform }}${{ matrix.arch == 'x86' && ' (x86)' || ''}}"
+    name: "${{ matrix.gui_cui }}/${{ matrix.dl_bd }}: ${{ matrix.vim_type }} ${{ matrix.vim_version }} on ${{ matrix.platform }}${{ matrix.arch == 'x86' && ' (x86)' || ''}}"
     strategy:
-      matrix:
-        vim_type: ['Vim', 'Neovim', 'MacVim']
-        vim_version: ['head', 'prev1', 'prev2']
-        platform: ['Linux', 'MacOS', 'Windows']
-        gui_cui: ['GUI', 'CUI']
-        dl_bd: ['DL', 'AT', 'BD']
-        arch: ['x86_64']
-
-        include:
-          # aliases
-          - platform: 'Linux'
-            os: 'ubuntu-latest'
-          - platform: 'MacOS'
-            os: 'macos-latest'
-          - platform: 'Windows'
-            os: 'windows-latest'
-          - gui_cui: 'GUI'
-            gui: 'yes'
-          - gui_cui: 'CUI'
-            gui: 'no'
-          - dl_bd: 'DL'
-            download: 'always'
-          - dl_bd: 'AT'
-            download: 'available'
-          - dl_bd: 'BD'
-            download: 'never'
-          # arch=x86 is only for Windows GUI head
-          - vim_type: 'Vim'
-            platform: 'Windows'
-            os: 'windows-latest'
-            version: 'head'
-            gui_cui: 'GUI'
-            gui: 'yes'
-            dl_bd: 'BD'
-            download: 'never'
-            arch: 'x86'
-          # Add versions
-          - vim_type: 'Vim'
-            vim_version: 'prev1'
-            version: 'v9.1.0000'
-          - vim_type: 'Vim'
-            vim_version: 'prev2'
-            version: 'v9.0.0000'
-          - vim_type: 'Neovim'
-            vim_version: 'prev1'
-            version: 'v0.9.5'
-          - vim_type: 'Neovim'
-            vim_version: 'prev2'
-            version: 'stable'
-          - vim_type: 'MacVim'
-            vim_version: 'prev1'
-            version: 'release-178'  # v9.0.1897
-          - vim_type: 'MacVim'
-            vim_version: 'prev2'
-            version: 'snapshot-173'  # v9.0.0065
-
-        exclude:
-          # DL Vim on MacOS is unavailable
-          - vim_type: 'Vim'
-            platform: 'MacOS'
-            dl_bd: 'DL'
-          # GUI version of Neovim is unavailable (also skip on Windows)
-          - vim_type: 'Neovim'
-            gui_cui: 'GUI'
-          # Build Neovim on Windows is not supported yet
-          - vim_type: 'Neovim'
-            platform: 'Windows'
-            dl_bd: 'BD'
-          # GUI version of MacVim is unavailable
-          - platform: 'MacOS'
-            gui_cui: 'GUI'
-          # MacVim is available only on MacOS
-          - vim_type: 'MacVim'
-            platform: 'Linux'
-          - vim_type: 'MacVim'
-            platform: 'Windows'
-          # x86 in win32-installer sometimes missing
-          - dl_bd: 'DL'
-            arch: 'x86'
-
+      matrix: ${{ fromJSON(needs.generate-matrix.outputs.matrix) }}
       fail-fast: false
 
-    needs: 'setup-actions'
+    needs:
+      - 'setup-actions'
+      - 'generate-matrix'
     runs-on: '${{ matrix.os }}'
     timeout-minutes: 20
     defaults:
@@ -153,7 +173,7 @@ jobs:
         id: 'vim'
         uses: './actions/setup-vim'
         with:
-          vim_version: '${{ matrix.version || matrix.vim_version }}'
+          vim_version: '${{ matrix.vim_version }}'
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
           arch: '${{ matrix.arch }}'
@@ -186,7 +206,7 @@ jobs:
         if: "matrix.download == 'never'"
         uses: './actions/setup-vim'
         with:
-          vim_version: '${{ matrix.version || matrix.vim_version }}'
+          vim_version: '${{ matrix.vim_version }}'
           vim_type: '${{ matrix.vim_type }}'
           gui: '${{ matrix.gui }}'
           download: '${{ matrix.download }}'
