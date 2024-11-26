@@ -142,6 +142,7 @@ export abstract class ReleasesInstaller implements Installer {
     for (;;) {
       const {repository}: DeepPartial<Response> = await graphql(RELEASES_QUERY, parameters);
       const resReleases = (repository?.releases?.edges?.map(node => node.node) || []) as Release[];
+      console.log(`fetched: ${resReleases.at(0)?.tagName}...${resReleases.at(-1)?.tagName} (${resReleases.length})`);
 
       // First time.
       if (newReleases.length === 0) {
@@ -175,6 +176,7 @@ export abstract class ReleasesInstaller implements Installer {
         if (releases[0]?.tagName === release.tagName) {
           if (releases[0]?.tagCommit.oid === release.tagCommit?.oid) {
             // Reach to the head of incomplete cache.
+            console.log(`break fetching: tagname=${release.tagName} tagCommit=${release.tagCommit.oid}`);
             break fetching;
           }
           // if A.tagCommit.oid != B.tagCommit.oid thouth A.tagName == B.tagName,
@@ -186,6 +188,7 @@ export abstract class ReleasesInstaller implements Installer {
         if (availableVersion) {
           if (availableVersion instanceof semver.SemVer) {
             if ((toSemver(release.tagName)?.compare(availableVersion) ?? 1) <= 0) {
+              console.log(`break fetching: compare=${toSemver(release.tagName)?.compare(availableVersion)}`);
               break fetching;
             }
           } else if (release.tagName === availableVersion) {
@@ -193,6 +196,7 @@ export abstract class ReleasesInstaller implements Installer {
           }
         }
       }
+      console.log(`newReleases: ${newReleases.length}`);
       const pageInfo = repository?.releases?.pageInfo;
       if (!pageInfo?.hasNextPage) {
         break;
@@ -235,8 +239,16 @@ export abstract class ReleasesInstaller implements Installer {
     const releases = this.releases.filter((release) => {
       const releaseVersion = this.toSemverString(release);
       const releaseSemver = toSemver(releaseVersion);
+      if (!releaseSemver) {
+        console.log(`Invalid semver: ${releaseVersion}`);
+      }
       return releaseSemver && semver.lte(vimSemVer, releaseSemver);
     });
+    console.log(`Remain ${releases.length} releases`);
+    releases.forEach(release => {
+      console.log(release.tagName);
+    });
+    console.log("----");
     return releases.pop();
   }
 
