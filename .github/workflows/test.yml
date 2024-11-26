@@ -164,6 +164,16 @@ jobs:
         shell: bash
 
     steps:
+      - name: 'Show job info'
+        run: |
+          echo "Platform: ${{ matrix.platform }}"
+          echo "OS: ${{ matrix.os }}"
+          echo "Vim type: ${{ matrix.vim_type }}"
+          echo "Vim version: ${{ matrix.vim_version }}"
+          echo "GUI: ${{ matrix.gui }}"
+          echo "Download: ${{ matrix.download }}"
+          echo "Architecture: ${{ matrix.arch }}"
+          echo "Cache key: 'test-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}'"
       - name: 'Download actions'
         uses: 'actions/download-artifact@v4'
         with:
