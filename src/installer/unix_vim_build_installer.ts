@@ -8,7 +8,7 @@ import * as semver from "semver";
 export class UnixVimBuildInstaller extends VimBuildInstaller implements Installer {
   async install(vimVersion: FixedVersion): Promise<void> {
     const reposPath = await this.cloneVim(vimVersion);
-    await backportPatch(reposPath, vimVersion);
+    await backportPatch(reposPath, vimVersion, this.isGUI);
 
     const args = [`--prefix=${this.installDir}`, "--with-features=huge"];
 

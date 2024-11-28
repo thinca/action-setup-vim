@@ -2,23 +2,27 @@ import * as semver from "semver";
 import {Buffer} from "buffer";
 import {exec} from "@actions/exec";
 
-export async function backportPatch(reposPath: string, vimVersion: string): Promise<void> {
+export async function backportPatch(reposPath: string, vimVersion: string, isGUI: boolean): Promise<void> {
   const vimSemver = semver.coerce(vimVersion, {loose: true});
   if (!vimSemver) {
     return;
   }
 
   if (process.platform === "win32") {
-    await backportPatchForWindows(reposPath, vimSemver, vimVersion);
+    await backportPatchForWindows(reposPath, vimSemver, vimVersion, isGUI);
   }
   if (process.platform === "darwin") {
     await backportPatchForMacOS(reposPath, vimSemver);
   }
 }
 
-export async function backportPatchForWindows(reposPath: string, vimVersion: semver.SemVer, vimVersionString: string): Promise<void> {
+export async function backportPatchForWindows(reposPath: string, vimVersion: semver.SemVer, vimVersionString: string, isGUI: boolean): Promise<void> {
   if (semver.lt(vimVersion, "7.4.960")) {
     await exec("sh", ["-c", `curl -s https://github.com/vim/vim/compare/${vimVersionString}...v7.4.960.diff | git apply --include src/Make_mvc.mak`], {cwd: reposPath});
+    if (isGUI && semver.lt(vimVersion, "7.4.393")) {
+      // After patch 7.4.393, directx related files are added.
+      await exec("sed", ["-i", "/gui_dwrite/d", "src/Make_mvc.mak"], {cwd: reposPath});
+    }
     if (semver.lt(vimVersion, "7.4.399")) {
       // After patch 7.4.399, `crypt` files are separeted.
       await exec("sed", ["-i", "/crypt/d", "src/Make_mvc.mak"], {cwd: reposPath});

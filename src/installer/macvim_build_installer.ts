@@ -32,7 +32,7 @@ export class MacVimBuildInstaller extends BuildInstaller {
     await exec("xcode-select", ["-p"]);
     const tag = this.tags[vimVersion] || vimVersion;
     const reposPath = await this.cloneVim(tag);
-    await backportPatch(reposPath, vimVersion);
+    await backportPatch(reposPath, vimVersion, this.isGUI);
 
     // To avoid `sed: RE error: illegal byte sequence` error, should set 'LC_ALL=C'.
     process.env.LC_ALL = "C";

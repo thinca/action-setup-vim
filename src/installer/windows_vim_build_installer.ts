@@ -10,7 +10,7 @@ import {VimBuildInstaller} from "./vim_build_installer";
 export class WindowsVimBuildInstaller extends VimBuildInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
     const reposPath = await this.cloneVim(vimVersion);
-    await backportPatch(reposPath, vimVersion);
+    await backportPatch(reposPath, vimVersion, this.isGUI);
     const arch = core.getInput("arch").includes("64") ? "x64" : "x86";
     const srcPath = path.join(reposPath, "src");
     const batPath = path.join(srcPath, "install.bat");
