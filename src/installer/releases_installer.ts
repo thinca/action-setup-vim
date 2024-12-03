@@ -185,7 +185,7 @@ export abstract class ReleasesInstaller implements Installer {
         newReleases.push(release);
         if (availableVersion) {
           if (availableVersion instanceof semver.SemVer) {
-            if ((toSemver(release.tagName)?.compare(availableVersion) ?? 0) < 0) {
+            if ((toSemver(release.tagName)?.compare(availableVersion) ?? 1) <= 0) {
               break fetching;
             }
           } else if (release.tagName === availableVersion) {
