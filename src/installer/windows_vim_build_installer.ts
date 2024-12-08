@@ -10,7 +10,7 @@ import {VimBuildInstaller} from "./vim_build_installer";
 export class WindowsVimBuildInstaller extends VimBuildInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
     const reposPath = await this.cloneVim(vimVersion);
-    await backportPatch(reposPath, vimVersion, this.isGUI);
+    const extraArgs = await backportPatch(reposPath, vimVersion, this.isGUI);
     const arch = core.getInput("arch").includes("64") ? "x64" : "x86";
     const srcPath = path.join(reposPath, "src");
     const batPath = path.join(srcPath, "install.bat");
@@ -23,7 +23,7 @@ export class WindowsVimBuildInstaller extends VimBuildInstaller {
     rem Suppress progress animation
     sed -e "s/@<<$/@<< | sed -e 's#.*\\\\r.*##'/" Make_mvc.mak > Make_mvc2.mak
 
-    nmake -nologo -f Make_mvc2.mak ${guiOptions} FEATURES=HUGE IME=yes MBYTE=yes ICONV=yes DEBUG=no TERMINAL=yes
+    nmake -nologo -f Make_mvc2.mak ${guiOptions} FEATURES=HUGE IME=yes MBYTE=yes ICONV=yes DEBUG=no TERMINAL=yes ${extraArgs.join(" ")}
 
     copy /Y ..\\README.txt ..\\runtime
     copy /Y ..\\vimtutor.bat ..\\runtime
