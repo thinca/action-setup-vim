@@ -2,26 +2,56 @@ import * as semver from "semver";
 import {Buffer} from "buffer";
 import {exec} from "@actions/exec";
 
-export async function backportPatch(reposPath: string, vimVersion: string): Promise<void> {
+export async function backportPatch(reposPath: string, vimVersion: string, isGUI: boolean): Promise<string[]> {
+  const extraArgs: string[] = [];
   const vimSemver = semver.coerce(vimVersion, {loose: true});
   if (!vimSemver) {
-    return;
+    return extraArgs;
   }
 
   if (process.platform === "win32") {
-    await backportPatchForWindows(reposPath, vimSemver, vimVersion);
+    extraArgs.push(...await backportPatchForWindows(reposPath, vimSemver, vimVersion, isGUI));
   }
   if (process.platform === "darwin") {
     await backportPatchForMacOS(reposPath, vimSemver);
   }
+  return extraArgs;
 }
 
-export async function backportPatchForWindows(reposPath: string, vimVersion: semver.SemVer, vimVersionString: string): Promise<void> {
+export async function backportPatchForWindows(reposPath: string, vimVersion: semver.SemVer, vimVersionString: string, isGUI: boolean): Promise<string[]> {
+  const extraArgs: string[] = [];
   if (semver.lt(vimVersion, "7.4.960")) {
+    // Apply all patches before 7.4.960 for Make_mvc.mak because cherry-picking fails.
     await exec("sh", ["-c", `curl -s https://github.com/vim/vim/compare/${vimVersionString}...v7.4.960.diff | git apply --include src/Make_mvc.mak`], {cwd: reposPath});
+
     if (semver.lt(vimVersion, "7.4.399")) {
       // After patch 7.4.399, `crypt` files are separeted.
       await exec("sed", ["-i", "/crypt/d", "src/Make_mvc.mak"], {cwd: reposPath});
+    }
+  }
+
+  if (isGUI && semver.lt(vimVersion, "7.4.1944")) {
+    const baseVersion = semver.lt(vimVersion, "7.4.960") ? "v7.4.960" : vimVersionString;
+    // Apply all patches before 7.4.1944 for Make_mvc.mak because cherry-picking fails.
+    await exec("sh", ["-c", `curl -s https://github.com/vim/vim/compare/${baseVersion}...v7.4.1944.diff | git apply --include src/Make_mvc.mak`], {cwd: reposPath});
+    await exec("curl", ["-sL", "https://github.com/vim/vim/raw/refs/tags/v7.4.1944/src/xpm/x64/lib-vc14/libXpm.lib", "-o", "src/xpm/x64/lib-vc14/libXpm.lib", "--create-dirs"], {cwd: reposPath});
+    await exec("curl", ["-sL", "https://github.com/vim/vim/raw/refs/tags/v7.4.1944/src/xpm/x86/lib-vc14/libXpm.lib", "-o", "src/xpm/x86/lib-vc14/libXpm.lib", "--create-dirs"], {cwd: reposPath});
+
+    if (semver.lt(vimVersion, "7.4.393")) {
+      // After patch 7.4.393, directx related files are added.
+      await exec("sed", ["-i", "/gui_dwrite/d", "src/Make_mvc.mak"], {cwd: reposPath});
+    }
+    if (semver.lt(vimVersion, "7.4.1040")) {
+      // tee.exe is not supported before 7.4.1040.
+      await exec("sed", ["-i", "/tee\\\\.exe \\\\\\\\$/d", "src/Make_mvc.mak"], {cwd: reposPath});
+    }
+    if (semver.lt(vimVersion, "7.4.1154")) {
+      // After patch 7.4.1154, `json` support is added.
+      await exec("sed", ["-i", "/json/d", "src/Make_mvc.mak"], {cwd: reposPath});
+    }
+    if (semver.lt(vimVersion, "7.4.1169")) {
+      // Patches about channel is applied but it is not available before 7.4.1169.
+      extraArgs.push("CHANNEL=no");
     }
   }
 
@@ -58,6 +88,7 @@ link = link
 `;
     await exec("vim", ["-es"], {cwd: reposPath, input: Buffer.from(script), ignoreReturnCode: true});
   }
+  return extraArgs;
 }
 
 export async function backportPatchForMacOS(reposPath: string, vimSemver: semver.SemVer): Promise<void> {
