@@ -67,12 +67,19 @@ jobs:
               ["Vim", "head"],
               ["Vim", "v9.1.0000"],
               ["Vim", "v9.0.0000"],
+              ["Vim", "v8.2.0000"],
+              ["Vim", "v8.1.0001"],
+              ["Vim", "v8.0.0002"],
+              ["Vim", "v7.4"],
               ["Neovim", "head"],
+              ["Neovim", "v0.10.2"],
               ["Neovim", "v0.9.5"],
-              ["Neovim", "stable"],
+              ["Neovim", "v0.9.0"],
+              ["Neovim", "v0.8.3"],
               ["MacVim", "head"],
-              ["MacVim", "release-178"],  // v9.0.1897
+              ["MacVim", "release-179"],  // v9.1.0000
               ["MacVim", "snapshot-173"],  // v9.0.0065
+              ["MacVim", "snapshot-162"],  // v8.2.319
             ].flatMap(([vim_type, vim_version]) =>
               ["Linux", "MacOS", "Windows"].map(platform => ({
                 vim_type,
@@ -108,6 +115,11 @@ jobs:
             ).filter(({ vim_type, vim_version, platform, gui_cui, dl_bd }) => {
               // DL Vim on MacOS is unavailable
               if (vim_type === "Vim" && platform === "MacOS" && dl_bd === "DL") {
+                return false;
+              }
+              // Downloading Vim from AppImage is available from v8.1.1239.
+              if (vim_type === "Vim" && platform === "Linux" && dl_bd === "DL" &&
+                  (vim_version === "v8.1.0001" || vim_version === "v8.0.0002" || vim_version === "v7.4")) {
                 return false;
               }
               // GUI version of Neovim is unavailable (also skip on Windows)
@@ -281,7 +293,7 @@ jobs:
         id: 'neovim_latest'
         uses: './actions/setup-vim'
         with:
-          vim_version: 'v0.9.5'
+          vim_version: 'v0.10.2'
           vim_type: 'Neovim'
       - name: 'Setup MacVim head'
         if: "matrix.platform == 'MacOS'"
@@ -295,7 +307,7 @@ jobs:
         id: 'macvim_latest'
         uses: './actions/setup-vim'
         with:
-          vim_version: 'release-178'
+          vim_version: 'release-179'
           vim_type: 'MacVim'
 
       - name: 'Check Vim head version'
