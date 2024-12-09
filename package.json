@@ -16,13 +16,16 @@
     "semver": "^7.6.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.16.0",
     "@types/node": "^20.14.8",
     "@types/semver": "^7.5.8",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
-    "@typescript-eslint/parser": "^7.14.1",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
     "esbuild": "0.21.5",
-    "eslint": "^8.57.0",
-    "eslint-plugin-import": "^2.29.1",
+    "eslint": "^9.16.0",
+    "eslint-plugin-import": "^2.31.0",
+    "globals": "^15.13.0",
     "typescript": "^5.5.2"
   },
   "homepage": "https://github.com/thinca/action-setup-vim",
