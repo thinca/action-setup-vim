@@ -5,6 +5,7 @@
 - Fixed: Remove unnecessary packages in MacOS Neovim build installer.
 - Fixed: Fix some problems with latest GitHub-hosted runners.
   - Add patches for older Vim in Windows and MacOS.
+- Security: Update dependencies.
 
 
 ## v2.0.3 - 2024-06-26
