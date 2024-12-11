@@ -18,7 +18,7 @@ export class MacVimBuildInstaller extends BuildInstaller {
 
   async obtainFixedVersion(vimVersion: string): Promise<string> {
     const log = await execGit(["log", "-20", "--format=format:%s"], {cwd: this.repositoryPath(vimVersion)});
-    const matched = /^\s*patch\s+v?(\d+\.\d+\.\d+)/m.exec(log);
+    const matched = /^\s*(?:patch|updated for version)\s+v?(\d+\.\d+\.\d+)/m.exec(log);
     if (matched) {
       const version = `v${matched[1]}`;
       const tag = await super.obtainFixedVersion(vimVersion);
@@ -32,7 +32,7 @@ export class MacVimBuildInstaller extends BuildInstaller {
     await exec("xcode-select", ["-p"]);
     const tag = this.tags[vimVersion] || vimVersion;
     const reposPath = await this.cloneVim(tag);
-    await backportPatch(reposPath, vimVersion);
+    await backportPatch(reposPath, vimVersion, this.isGUI);
 
     // To avoid `sed: RE error: illegal byte sequence` error, should set 'LC_ALL=C'.
     process.env.LC_ALL = "C";
@@ -60,6 +60,11 @@ export class MacVimBuildInstaller extends BuildInstaller {
       `.trim() + "\n";
       await exec("patch", ["-p1"], {cwd: reposPath, input: Buffer.from(patch)});
     }
+
+    if (semver.lte(vimVersion, "8.2.5135", true)) {
+      args.push("CFLAGS=-Wno-implicit-int");
+    }
+
     await exec("./configure", args, {cwd: reposPath});
     await exec("make", [], {cwd: reposPath});
     await io.mkdirP(this.installDir);

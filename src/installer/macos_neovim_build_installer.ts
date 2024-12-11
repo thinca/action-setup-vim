@@ -6,7 +6,7 @@ export class MacosNeovimBuildInstaller extends NeovimBuildInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
     const reposPath = await this.cloneVim(vimVersion);
     const packages = [
-      "ninja", "libtool", "automake", "cmake", "pkg-config", "gettext",
+      "ninja", "libtool", "automake",
     ];
     await exec("brew", ["install", ...packages]);
     // Build fails with Xcode 11.1 (default)
