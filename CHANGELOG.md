@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v2.1.0 - 2024-12-11
 
 - Fixed: Remove unnecessary packages in MacOS Neovim build installer.
 - Fixed: Fix some problems with latest GitHub-hosted runners.
