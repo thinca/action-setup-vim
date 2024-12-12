@@ -64,13 +64,17 @@ jobs:
         with:
           script: |
             const matrix = [
-              ["Vim", "head"],
-              ["Vim", "v9.1.0000"],
-              ["Vim", "v9.0.0000"],
-              ["Vim", "v8.2.0000"],
-              ["Vim", "v8.1.0001"],
-              ["Vim", "v8.0.0002"],
-              ["Vim", "v7.4"],
+              //["Vim", "head"],
+              //["Vim", "v9.1.0000"],
+              //["Vim", "v9.0.0000"],
+              //["Vim", "v8.2.5114"],
+              ["Vim", "v8.2.4495"],
+              //["Vim", "v8.2.4485"],
+              //["Vim", "v8.2.2965"],
+              //["Vim", "v8.2.0000"],
+              //["Vim", "v8.1.0001"],
+              //["Vim", "v8.0.0002"],
+              //["Vim", "v7.4"],
             ].flatMap(([vim_type, vim_version]) =>
               ["Linux", "LinuxL"].map(platform => ({
                 vim_type,
@@ -181,6 +185,7 @@ jobs:
           arch: '${{ matrix.arch }}'
           download: '${{ matrix.download }}'
           cache: 'test-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}'
+      - uses: mxschmitt/action-tmate@v3
       - name: 'Check Setup Vim is done without cache'
         if: "matrix.download == 'never'"
         run: |
