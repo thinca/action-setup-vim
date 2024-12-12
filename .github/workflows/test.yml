@@ -64,35 +64,23 @@ jobs:
         with:
           script: |
             const matrix = [
-              ["Vim", "head"],
-              ["Vim", "v9.1.0000"],
-              ["Vim", "v9.0.0000"],
-              ["Vim", "v8.2.0000"],
-              ["Vim", "v8.1.0001"],
-              ["Vim", "v8.0.0002"],
-              ["Vim", "v7.4"],
-              ["Neovim", "head"],
-              ["Neovim", "v0.10.2"],
+              //["Neovim", "v0.10.2"],
               ["Neovim", "v0.9.5"],
-              ["Neovim", "v0.9.0"],
-              ["Neovim", "v0.8.3"],
-              ["MacVim", "head"],
-              ["MacVim", "release-179"],  // v9.1.0000
-              ["MacVim", "snapshot-173"],  // v9.0.0065
-              ["MacVim", "snapshot-162"],  // v8.2.319
+              //["Neovim", "v0.9.0"],
+              //["Neovim", "v0.8.3"],
             ].flatMap(([vim_type, vim_version]) =>
-              ["Linux", "MacOS", "Windows"].map(platform => ({
+              ["MacOS"].map(platform => ({
                 vim_type,
                 vim_version,
                 platform,
               }))
             ).flatMap((param) =>
-              ["GUI", "CUI"].map((gui_cui) => ({
+              ["CUI"].map((gui_cui) => ({
                 ...param,
                 gui_cui,
               }))
             ).flatMap((param) =>
-              ["DL", "AT", "BD"].map((dl_bd) => ({
+              ["BD"].map((dl_bd) => ({
                 ...param,
                 dl_bd,
               }))
@@ -101,17 +89,6 @@ jobs:
                 ...param,
                 arch,
               }))
-            ).concat(
-              [
-                {
-                  vim_type: "Vim",
-                  vim_version: "head",
-                  platform: "Windows",
-                  gui_cui: "GUI",
-                  dl_bd: "BD",
-                  arch: "x86",
-                },
-              ]
             ).filter(({ vim_type, vim_version, platform, gui_cui, dl_bd }) => {
               // DL Vim on MacOS is unavailable
               if (vim_type === "Vim" && platform === "MacOS" && dl_bd === "DL") {
@@ -147,7 +124,7 @@ jobs:
               dl_bd,
               os: {
                 Linux: "ubuntu-latest",
-                MacOS: "macos-latest",
+                MacOS: "macos-15",
                 Windows: "windows-latest",
               }[platform],
               gui: gui_cui === "GUI" ? "yes" : "no",
@@ -170,7 +147,6 @@ jobs:
       - 'setup-actions'
       - 'generate-matrix'
     runs-on: '${{ matrix.os }}'
-    timeout-minutes: 20
     defaults:
       run:
         shell: bash
@@ -201,6 +177,28 @@ jobs:
           arch: '${{ matrix.arch }}'
           download: '${{ matrix.download }}'
           cache: 'test-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}'
+        timeout-minutes: 5
+      - name: 'Find error version'
+        if: 'always()'
+        run: |
+          brew install coreutils
+          cd ${RUNNER_TEMP}/repos/neovim/${{ matrix.vim_version }}
+          cat <<'EOF' > run.sh
+          gtimeout 10m bash -c 'make CMAKE_BUILD_TYPE=RelWithDebInfo MACOSX_DEPLOYMENT_TARGET=10.14 "CMAKE_EXTRA_FLAGS=-DCMAKE_INSTALL_PREFIX=${RUNNER_TEMP}/neovim/${{ matrix.vim_version }}" && make install'
+          result=$?
+          echo "Result: $result"
+          if [[ $result -eq 0 ]]; then
+            echo "Success!"
+            exit 1
+          fi
+          echo "Failure!"
+          exit 0
+          EOF
+          git fetch --tags
+          git bisect start --term-old broken --term-new fixed
+          git bisect fixed v0.10.2
+          git bisect broken HEAD
+          git bisect run bash run.sh
       - name: 'Check Setup Vim is done without cache'
         if: "matrix.download == 'never'"
         run: |
@@ -245,6 +243,7 @@ jobs:
 
   multiple-test:
     name: 'Install multiple Vims on ${{ matrix.platform }}'
+    if: false
     strategy:
       matrix:
         platform: ['Linux', 'MacOS', 'Windows']
@@ -371,7 +370,7 @@ jobs:
     needs: ['test', 'multiple-test']
     runs-on: 'ubuntu-latest'
     timeout-minutes: 1
-    if: 'always()'
+    if: false
     steps:
       - name: 'Get GitHub GraphQL API rate limit'
         id: rate_limit
