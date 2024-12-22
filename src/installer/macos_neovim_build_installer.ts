@@ -23,6 +23,7 @@ export class MacosNeovimBuildInstaller extends NeovimBuildInstaller {
       if (newMakeLists !== makeLists) {
         fs.writeFileSync(path.join(reposPath, "src", "nvim", "CMakeLists.txt"), newMakeLists);
       }
+      await exec("git", ["diff"], {cwd: reposPath});
     }
 
     // Build fails with Xcode 11.1 (default)

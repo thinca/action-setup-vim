@@ -66,8 +66,8 @@ jobs:
             const matrix = [
               //["Neovim", "v0.10.2"],
               ["Neovim", "v0.9.5"],
-              //["Neovim", "v0.9.0"],
-              //["Neovim", "v0.8.3"],
+              ["Neovim", "v0.9.0"],
+              ["Neovim", "v0.8.3"],
             ].flatMap(([vim_type, vim_version]) =>
               ["MacOS"].map(platform => ({
                 vim_type,
@@ -179,7 +179,7 @@ jobs:
           cache: 'test-${{ github.run_id }}-${{ github.run_attempt }}-${{ strategy.job-index }}'
         timeout-minutes: 5
       - name: 'Find error version'
-        if: 'always()'
+        if: 'failure()'
         run: |
           brew install coreutils
           cd ${RUNNER_TEMP}/repos/neovim/${{ matrix.vim_version }}
