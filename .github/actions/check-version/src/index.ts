@@ -62,7 +62,7 @@ function normalizeVersion(str: string): [string | null, string | null] {
       replace(/(^|[^\d])0+(\d)/g, "$1$2").
       replace(/(?:\.0)+$/, "");
   }
-  const sha1Matched = /^.*-\d+[-+]g([0-9a-f]{7,})$/.exec(str);
+  const sha1Matched = /^.*-\d+[-+]g([0-9a-f]{7,})(?:-\w+)?$/.exec(str);
   if (sha1Matched) {
     sha1OrTag = sha1Matched[1];
   } else if (0 <= str.indexOf("-")) {
