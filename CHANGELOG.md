@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed: Add a patch for building old Neovim on MacOS 15.
 
 
 ## v2.1.0 - 2024-12-11
