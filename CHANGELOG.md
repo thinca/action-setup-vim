@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed: Add support for downloading Vim on Ubuntu 24.04.
 - Fixed: Add a patch for building old Neovim on MacOS 15.
 
 
