@@ -98,7 +98,6 @@ export abstract class ReleasesInstaller implements Installer {
   readonly isGUI: boolean;
 
   private release?: Release;
-  private releases: Release[] = [];
 
   constructor(installDir: string, isGUI: boolean) {
     this.installDir = installDir;
@@ -110,9 +109,9 @@ export abstract class ReleasesInstaller implements Installer {
   }
 
   async resolveVersion(vimVersion: string): Promise<FixedVersion> {
-    this.releases = await this.fetchReleases();
-    this.release = this.findRelease(vimVersion);
-    const actualVersion = this.perpetuateVersion();
+    const releases = await this.fetchReleases();
+    this.release = this.findRelease(releases, vimVersion);
+    const actualVersion = this.perpetuateVersion(releases);
     return actualVersion as FixedVersion;
   }
 
@@ -216,31 +215,30 @@ export abstract class ReleasesInstaller implements Installer {
     return releases;
   }
 
-  private findRelease(vimVersion: string): Release | undefined {
+  private findRelease(releases: Release[], vimVersion: string): Release | undefined {
     const isHead = vimVersion === "head";
     if (isHead) {
-      return this.releases[0];
+      return releases[0];
     }
 
     const isLatest = vimVersion === "latest";
     if (isLatest) {
-      return this.releases.find(release => release.isLatest);
+      return releases.find(release => release.isLatest);
     }
 
     const vimSemVer = toSemver(vimVersion);
     if (!vimSemVer) {
-      return this.releases.find(release => release.tagName === vimVersion);
+      return releases.find(release => release.tagName === vimVersion);
     }
 
-    const releases = this.releases.filter((release) => {
+    return releases.filter((release) => {
       const releaseVersion = this.toSemverString(release);
       const releaseSemver = toSemver(releaseVersion);
       return releaseSemver && semver.lte(vimSemVer, releaseSemver);
-    });
-    return releases.pop();
+    }).pop();
   }
 
-  private perpetuateVersion(): string {
+  private perpetuateVersion(releases: Release[]): string {
     const release = this.release;
     if (!release) {
       throw new ActionError("Target release not found");
@@ -256,7 +254,7 @@ export abstract class ReleasesInstaller implements Installer {
 
     // It may be released as numbered version.
     // Only check the first page
-    for (const release of this.releases.slice(0, 10)) {
+    for (const release of releases.slice(0, 10)) {
       const {tagName} = release;
       if (!toSemver(tagName)) {
         continue;
