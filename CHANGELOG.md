@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Unreleased
+
+- Fixed: Add support for downloading Vim on Ubuntu 24.04.
+- Fixed: Add a patch for building old Neovim on MacOS 15.
+
+
 ## v2.1.0 - 2024-12-11
 
 - Fixed: Remove unnecessary packages in MacOS Neovim build installer.
