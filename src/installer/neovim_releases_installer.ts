@@ -7,6 +7,7 @@ import {FixedVersion} from "../interfaces";
 
 export abstract class NeovimReleasesInstaller extends SemverReleasesInstaller {
   readonly repository: string = "neovim/neovim";
+  readonly arch = process.arch === "arm64" ? "arm64" : "x86_64";
 
   async install(vimVersion: FixedVersion): Promise<void> {
     const archiveFilePath = await this.downloadAsset(vimVersion);
