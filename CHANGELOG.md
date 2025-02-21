@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed: Downloading latest Neovim.
 
 
 ## v2.1.1 - 2025-01-06
