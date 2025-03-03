@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## Unreleased
+
+
+
 ## v2.1.2 - 2025-03-03
 
 - Fixed: Downloading latest Neovim.
