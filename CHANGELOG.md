@@ -3,6 +3,9 @@
 ## Unreleased
 
 - Fixed: Downloading latest Neovim.
+- Security: Update dependencies.
+  - Update all dependencies by resetting the lock file.
+    - This Action was previously failing when using a cache, but this has been fixed in this update.
 
 
 ## v2.1.1 - 2025-01-06
