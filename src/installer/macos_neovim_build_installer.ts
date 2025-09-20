@@ -31,6 +31,10 @@ export class MacosNeovimBuildInstaller extends NeovimBuildInstaller {
       `CMAKE_EXTRA_FLAGS=-DCMAKE_INSTALL_PREFIX=${this.installDir}`,
     ];
 
+    // Old versions are missing on leonerd.org.uk.
+    await exec("sed", ["-i", "", "-e", "s;https://www\\.leonerd\\.org\\.uk/code/libvterm/libvterm-0.3.1\\.tar\\.gz;https://github.com/neovim/deps/raw/aa004f1b2b6470a92363cba8e1cc1874141dacc4/opt/libvterm-0.3.1.tar.gz;", "cmake.deps/CMakeLists.txt"], {cwd: reposPath});
+    await exec("sed", ["-i", "", "-e", "s;https://www\\.leonerd\\.org\\.uk/code/libtermkey/libtermkey-0\\.22\\.tar\\.gz;https://github.com/neovim/deps/raw/aa004f1b2b6470a92363cba8e1cc1874141dacc4/opt/libtermkey-0.22.tar.gz;", "cmake.deps/CMakeLists.txt"], {cwd: reposPath});
+
     const env: {[key: string]: string} = {};
     Object.assign(env, process.env);
 
