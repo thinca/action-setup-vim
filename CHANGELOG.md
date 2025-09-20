@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed: Older Neovim builds fail.
 
 
 ## v2.1.2 - 2025-03-03
