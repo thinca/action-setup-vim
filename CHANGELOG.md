@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v3.0.0 - 2025-09-21
 
 - Breaking Change: Update Node 20 to Node 24 the actions.
 - Fixed: Older Neovim builds fail.
