@@ -42,5 +42,5 @@ branding:
   color: 'green'
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'action.js'
