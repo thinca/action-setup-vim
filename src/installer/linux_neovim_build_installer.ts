@@ -14,7 +14,7 @@ export class LinuxNeovimBuildInstaller extends NeovimBuildInstaller {
     ];
     const configureArgs = [
       "CMAKE_BUILD_TYPE=RelWithDebInfo",
-      `CMAKE_EXTRA_FLAGS=-DCMAKE_INSTALL_PREFIX=${this.installDir}`,
+      `CMAKE_INSTALL_PREFIX=${this.installDir}`,
     ];
 
     // XXX: Trick for v0.2.x.  This condition is not strict.
@@ -28,6 +28,21 @@ export class LinuxNeovimBuildInstaller extends NeovimBuildInstaller {
     // But, cannot build Neovim v0.4.4 with CMake 3.20.
     // So delete it and use CMake 3.16 from apt-get.
     await exec("sudo", ["rm", "-f", "/usr/local/bin/cmake"]);
+
+    // Workaround for before 8b8e60728486e1fbb308bee2961175be355e550a
+    const isOldBuildSystemForLuarock = this.findLine(path.join(reposPath, "cmake.deps", "CMakeLists.txt"), "USE_BUNDLED_LUAROCKS");
+    if (isOldBuildSystemForLuarock) {
+      packages.push(
+        "lua5.1",
+        "lua-lpeg",
+        "lua-bitop",
+        "lua-mpack"
+      );
+
+      configureArgs.push(
+        "DEPS_CMAKE_FLAGS=-DUSE_BUNDLED_DEPS=ON -DUSE_BUNDLED_LUAROCKS=OFF"
+      );
+    }
 
     await exec("sudo", ["apt-get", "update"]);
     await exec("sudo", ["apt-get", "install", ...packages]);

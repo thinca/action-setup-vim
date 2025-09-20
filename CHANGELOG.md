@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## Unreleased
+
+- Breaking Change: Update Node 20 to Node 24 the actions.
+- Fixed: Older Neovim builds fail.
+- Security: Update dependencies.
+
+
 ## v2.1.2 - 2025-03-03
 
 - Fixed: Downloading latest Neovim.
