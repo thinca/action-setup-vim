@@ -25,8 +25,33 @@ export class MacosNeovimBuildInstaller extends NeovimBuildInstaller {
       }
     }
 
-    // Build fails with Xcode 11.1 (default)
-    await exec("make", ["CMAKE_BUILD_TYPE=RelWithDebInfo", "MACOSX_DEPLOYMENT_TARGET=10.14", `CMAKE_EXTRA_FLAGS=-DCMAKE_INSTALL_PREFIX=${this.installDir}`], {cwd: reposPath});
-    await exec("make", ["install"], {cwd: reposPath});
+    const configureArgs = [
+      "CMAKE_BUILD_TYPE=RelWithDebInfo",
+      "MACOSX_DEPLOYMENT_TARGET=10.14",
+      `CMAKE_EXTRA_FLAGS=-DCMAKE_INSTALL_PREFIX=${this.installDir}`,
+    ];
+
+    const env: {[key: string]: string} = {};
+    Object.assign(env, process.env);
+
+    const depsMakeLists = fs.readFileSync(path.join(reposPath, "cmake.deps", "CMakeLists.txt"), "utf-8");
+    if (0 <= depsMakeLists.indexOf("USE_BUNDLED_LUAROCKS")) {
+      await exec("bash", ["-c", "curl -s --retry 3 https://www.lua.org/ftp/lua-5.1.5.tar.gz | tar xz && cd lua-5.1.5 && make macosx && sudo make install"], {cwd: reposPath});
+      await exec("bash", ["-c", "curl -s --retry 3 https://luarocks.github.io/luarocks/releases/luarocks-3.12.2.tar.gz | tar xz && cd luarocks-3.12.2 && ./configure && make && sudo make install"], {cwd: reposPath});
+      await exec("bash", ["-c", "curl -s --retry 3 https://cmake.org/files/v3.20/cmake-3.20.0-macos-universal.tar.gz | tar xz"], {cwd: reposPath});
+      env["PATH"] = `${reposPath}/cmake-3.20.0-macos-universal/CMake.app/Contents/bin:${env["PATH"] || ""}`;
+
+      env["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5";
+
+      await exec("sudo", ["luarocks", "install", "LPeg"]);
+      await exec("sudo", ["luarocks", "install", "LuaBitOp"]);
+      await exec("sudo", ["luarocks", "install", "mpack"]);
+      configureArgs.push(
+        "DEPS_CMAKE_FLAGS=-DUSE_BUNDLED_DEPS=ON -DUSE_BUNDLED_LUAROCKS=OFF"
+      );
+    }
+
+    await exec("make", configureArgs, {cwd: reposPath, env});
+    await exec("make", ["install"], {cwd: reposPath, env});
   }
 }
