@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Unreleased
+## v3.0.1 - 2026-01-31
 
 - Security: Update dependencies.
 
