@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Security: Update dependencies.
 
 
 ## v3.0.0 - 2025-09-21
