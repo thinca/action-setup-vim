@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+- Security: Update dependencies.
+
+
 ## v3.0.0 - 2025-09-21
 
 - Breaking Change: Update Node 20 to Node 24 the actions.
