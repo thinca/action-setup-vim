@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## Unreleased
+
+- Fixed: Fix building Neovim v0.9.0 on macOS.
+- Security: Update dependencies.
+
+
 ## v3.0.2 - 2026-06-18
 
 - Security: Update dependencies.
