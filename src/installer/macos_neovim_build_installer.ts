@@ -1,8 +1,19 @@
 import * as fs from "fs";
 import * as path from "path";
+import * as semver from "semver";
 import {exec} from "@actions/exec";
+import {ActionError} from "../action_error";
 import {FixedVersion} from "../interfaces";
 import {NeovimBuildInstaller} from "./neovim_build_installer";
+
+function patchSource(filePath: string, from: string, to: string): void {
+  const source = fs.readFileSync(filePath, "utf-8");
+  const patched = source.replace(from, to);
+  if (patched === source) {
+    throw new ActionError(`Failed to patch for MacOS build: ${filePath}`);
+  }
+  fs.writeFileSync(filePath, patched);
+}
 
 export class MacosNeovimBuildInstaller extends NeovimBuildInstaller {
   async install(vimVersion: FixedVersion): Promise<void> {
@@ -30,6 +41,20 @@ export class MacosNeovimBuildInstaller extends NeovimBuildInstaller {
       "MACOSX_DEPLOYMENT_TARGET=10.14",
       `CMAKE_EXTRA_FLAGS=-DCMAKE_INSTALL_PREFIX=${this.installDir}`,
     ];
+
+    if (semver.eq(semver.coerce(vimVersion, {loose: true}) || "0.0.0", "0.9.0")) {
+      // Clang on the current MacOS image rejects these as errors.
+      patchSource(
+        path.join(reposPath, "src", "nvim", "api", "autocmd.c"),
+        "const char pattern_buflocal[BUFLOCAL_PAT_LEN];",
+        "char pattern_buflocal[BUFLOCAL_PAT_LEN];"
+      );
+      patchSource(
+        path.join(reposPath, "src", "nvim", "os", "shell.c"),
+        "if (since < (visit * 0.1L * NS_1_SECOND)) {",
+        "if (since < (visit * (NS_1_SECOND / 10))) {"
+      );
+    }
 
     // Old versions are missing on leonerd.org.uk.
     await exec("sed", ["-i", "", "-e", "s;https://www\\.leonerd\\.org\\.uk/code/libvterm/libvterm-0.3.1\\.tar\\.gz;https://github.com/neovim/deps/raw/aa004f1b2b6470a92363cba8e1cc1874141dacc4/opt/libvterm-0.3.1.tar.gz;", "cmake.deps/CMakeLists.txt"], {cwd: reposPath});
